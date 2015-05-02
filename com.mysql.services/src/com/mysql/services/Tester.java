@@ -1,11 +1,14 @@
 package com.mysql.services;
 
+import javax.servlet.ServletException;
+
+import com.google.android.gcm.demo.server.HomeServlet;
+
 public class Tester {
 
 	public static void main(String[] args) {
 	
-		System.out.println(new MainController().getVenuePhotos("1"));
-		
+		//System.out.println(new MainController().getVenuePhotos("1"));
 		
 		
 		/*StandardResult finalResult = new StandardResult();

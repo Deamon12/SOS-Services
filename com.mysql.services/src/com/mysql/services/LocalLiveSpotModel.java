@@ -30,7 +30,7 @@ public class LocalLiveSpotModel
 		try
 		{
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String connectionUrl = "jdbc:mysql://localhost:3306/LiveSpotDB";
+			String connectionUrl = "jdbc:mysql://localhost:3306/livespot"; //LiveSpotDB
 			String connectionUser = "livespotuser";
 			String connectionPassword = "password";
 			connection = DriverManager.getConnection(connectionUrl, connectionUser, connectionPassword);
