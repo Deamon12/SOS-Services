@@ -16,18 +16,198 @@ import com.sos.gcm.GoogleCloudMessaging;
 
 @Path ("/serviceclass")
 public class MainController {
-
-	//TODO Change to JSON objects from GSON
 	
-	//List<String> devices = new ArrayList<String>();
+	
+	
+	@Path ("/test")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String sayPlainTextHello() {
+		return "Test Call from MainController class";
+	}
+	
+	
+	@GET
+	@Path ("/getTags")
+	@Produces ("application/json")
+	public String getTags(){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getTags());
+	}
+	
+	@GET
+	@Path("/createUser")
+	@Produces("application/json")
+	public String createUser(@QueryParam("firstName") String firstName, @QueryParam("lastName") String lastName,
+			@QueryParam("password") String password, @QueryParam("email") String email, 
+			@QueryParam("deviceId") String deviceId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.createUser(firstName, lastName, password, email, deviceId));
+	}
+
+	@GET
+	@Path ("/getUserById")
+	@Produces ("application/json")
+	public String getUserById(@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getUserById(userId));
+	}
+	
+	@GET
+	@Path ("/doLogin")
+	@Produces ("application/json")
+	public String doLogin(@QueryParam("email") String email, @QueryParam("password") String password){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.doLogin(email, password));
+	}
+	
+	@GET
+	@Path ("/getQuestions")
+	@Produces ("application/json")
+	public String getQuestions(@QueryParam("latitude") String latitude, 
+			@QueryParam("longitude") String longitude, @QueryParam("tags") List<String> tags,
+			@QueryParam("limit") int limit){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getQuestions(latitude, longitude, tags, limit));
+	}
+	
+	
+	@GET
+	@Path ("/createQuestion")
+	@Produces ("application/json")
+	public String createQuestion(@QueryParam("latitude") String latitude, 
+			@QueryParam("longitude") String longitude, @QueryParam("tags") List<String> tags,
+			@QueryParam("limit") int limit, @QueryParam("userId") String userId, 
+			@QueryParam("questionText") String questionText){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getQuestions(latitude, longitude, tags, limit));
+	}
+	
+	@GET
+	@Path ("/viewQuestion")
+	@Produces ("application/json")
+	public String viewQuestion(@QueryParam("questionId") String questionId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.viewQuestion(questionId));
+	}
+	
+	
+	@GET
+	@Path ("/askToJoinGroup")
+	@Produces ("application/json")
+	public String askToJoinGroup(@QueryParam("questionId") String questionId, 
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.askToJoinGroup(questionId, userId));
+	}
+	
+	
+	@GET
+	@Path ("/acceptUser")
+	@Produces ("application/json")
+	public String acceptUser(@QueryParam("questionId") String questionId, 
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.askToJoinGroup(questionId, userId));
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param groupId - groupId; Use it to retrieve the userId who is hosting the group so we can notify them
+	 * @param userId - Person wanting to join the group
+	 * @return 
+	 */
+	/*
+	@Path ("/sendNotification")
+	@GET
+	@Produces("application/json")
+	public String sendNotification(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId){
+		
+		
+		//SOSModel model = new SOSModel();
+		//return new Gson().toJson(model.sendNotification(groupId, userId));
+		
+		//GoogleCloudMessaging is our object that handles notificatoin calls
+		 
+				GoogleCloudMessaging testing = new GoogleCloudMessaging();
+				try {
+					
+					return testing.sendMessage("Message testing" , Datastore.getDevices());
+				} catch (IOException e) {
+					
+					return e.toString();
+				}
+				
+		
+		
+	}*/
+	
+	/*
+	@Path ("/sendNotification")
+	@GET
+	//@Produces(MediaType.TEXT_PLAIN)
+	@Produces("application/json")
+	public String sendNotification(@QueryParam("userId") String userId, @QueryParam("groupId") String userId){
+		
+		
+		
+		Datastore.clearDevices();
+		
+		String emulatorId = "APA91bEcFh1-Kgq_rcnmonKKTYhiwIqSxuHsaN90DeuaQKpr08b4jSScLQmL2b1W4_KPKvpYqAzQaeJS_18efcLdh9CxMXJNd2pTx0VG1M97rI9okHvj2rCYmCvTjiRPkukk4TdMQxiy-LXhrKnyods5sEMYrOx65Q";
+		String myId = "APA91bFYrg-EnRpTuwC1L9SugPGSZyLHCUNJDJnd2Iu7DVERg-F2TEC1DsF-i_INE0rYZQUsA4q1v_733RqwyDklfE8DLI5Y99jC1ef-sUa4I15Wb3Y20j0aevzZNRvYNgDG1Ir0JpdibWXLz4GGEQ_qX4fFJCg4Hw";
+		Datastore.register(myId);
+		Datastore.register(emulatorId);
+		
+		//GoogleCloudMessaging is our object that handles notificatoin calls
+		 
+		GoogleCloudMessaging testing = new GoogleCloudMessaging();
+		try {
+			
+			return testing.sendMessage("Message testing" , Datastore.getDevices());
+		} catch (IOException e) {
+			
+			return e.toString();
+		}
+	}*/
+	
+	
+	
 	@Path ("/gcmregister")
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String gcmRegisterDevice(@QueryParam("deviceID") String deviceID){
 		
-		String emulatorId = "APA91bEcFh1-Kgq_rcnmonKKTYhiwIqSxuHsaN90DeuaQKpr08b4jSScLQmL2b1W4_KPKvpYqAzQaeJS_18efcLdh9CxMXJNd2pTx0VG1M97rI9okHvj2rCYmCvTjiRPkukk4TdMQxiy-LXhrKnyods5sEMYrOx65Q";
-		String myId = "APA91bFYrg-EnRpTuwC1L9SugPGSZyLHCUNJDJnd2Iu7DVERg-F2TEC1DsF-i_INE0rYZQUsA4q1v_733RqwyDklfE8DLI5Y99jC1ef-sUa4I15Wb3Y20j0aevzZNRvYNgDG1Ir0JpdibWXLz4GGEQ_qX4fFJCg4Hw";
-		//Datastore.register(myId);
 		
 		if(deviceID == null || deviceID.equals("")){
 			return "Missing param: deviceID";
@@ -42,27 +222,7 @@ public class MainController {
 		
 	}
 	
-	@Path ("/gcmsend")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String gcmsend(){
-		
-		Datastore.clearDevices();
-		
-		String emulatorId = "APA91bEcFh1-Kgq_rcnmonKKTYhiwIqSxuHsaN90DeuaQKpr08b4jSScLQmL2b1W4_KPKvpYqAzQaeJS_18efcLdh9CxMXJNd2pTx0VG1M97rI9okHvj2rCYmCvTjiRPkukk4TdMQxiy-LXhrKnyods5sEMYrOx65Q";
-		String myId = "APA91bFYrg-EnRpTuwC1L9SugPGSZyLHCUNJDJnd2Iu7DVERg-F2TEC1DsF-i_INE0rYZQUsA4q1v_733RqwyDklfE8DLI5Y99jC1ef-sUa4I15Wb3Y20j0aevzZNRvYNgDG1Ir0JpdibWXLz4GGEQ_qX4fFJCg4Hw";
-		Datastore.register(myId);
-		Datastore.register(emulatorId);
-		
-		GoogleCloudMessaging testing = new GoogleCloudMessaging();
-		try {
-			
-			return testing.sendMessage("Message testing" , Datastore.getDevices());
-		} catch (IOException e) {
-			
-			return e.toString();
-		}
-	}
+	
 	
 	@Path ("/gcmclear")
 	@GET
@@ -109,39 +269,7 @@ public class MainController {
 	
 	
 	
-	@Path ("/test")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String sayPlainTextHello() {
-		return "Test Call from MainController class";
-	}
 	
 	
-	@GET
-	@Path ("/getTags")
-	@Produces ("application/json")
-	public String getTags(){
-		
-		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.getTags());
-	}
-	
-	@GET
-	@Path("/createUser")
-	@Produces("application/json")
-	public String createUser(){
-		
-		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.createUser());
-	}
-
-	@GET
-	@Path ("/getUsers")
-	@Produces ("application/json")
-	public String getUsers(){
-		
-		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.getUsers());
-	}
 	
 }

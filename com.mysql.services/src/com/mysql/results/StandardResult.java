@@ -1,9 +1,5 @@
 package com.mysql.results;
 
-import java.util.List;
-
-import com.mysql.dto.Standard;
-
 
 public class StandardResult {
 
