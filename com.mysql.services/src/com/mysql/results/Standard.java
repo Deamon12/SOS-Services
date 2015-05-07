@@ -1,4 +1,4 @@
-package com.mysql.dto;
+package com.mysql.results;
 
 public class Standard {
 	

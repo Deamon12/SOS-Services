@@ -14,10 +14,7 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.mysql.dto.Standard;
-import com.mysql.dto.Tag;
-import com.mysql.dto.User;
-import com.mysql.jdbc.PreparedStatement;
+import com.mysql.results.Standard;
 import com.mysql.results.StandardResult;
 import com.sos.gcm.GoogleCloudMessaging;
 
