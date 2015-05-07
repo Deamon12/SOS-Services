@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 import com.mysql.dto.Standard;
 import com.mysql.dto.Tag;
 import com.mysql.dto.User;
+import com.mysql.jdbc.PreparedStatement;
 import com.mysql.results.StandardResult;
 import com.sos.gcm.GoogleCloudMessaging;
 
@@ -108,7 +109,7 @@ public class SOSModel
 	 * @return
 	 */
 	public StandardResult createUser(String firstName, String lastName, String password, 
-			String email , String deviceId){
+			String email, String deviceId){
 
 		//TODO Check to see if this userId exists in database already?
 		//TODO Save DeviceId
@@ -118,7 +119,7 @@ public class SOSModel
 		String query = 
 				"INSERT INTO users (user_id, first_name, last_name, password, email, active, description, main_info)"
 						+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True,"
-						+ " 'empty until user adds?', 'UCSD, Computer Science')";
+						+ " null , null)";
 
 		//TODO Add (FROM) return or move return user info to another call?
 
@@ -130,19 +131,6 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(query);   //TODO change to updateQuery of not returning result
 			
-			/*while (rs.next()){
-
-
-				User temp = new User();
-
-				temp.setUserID(rs.getString("user_id"));
-				temp.setFirstName(rs.getString("first_name"));
-				temp.setLastName(rs.getString("last_name"));
-				temp.setEmail(rs.getString("email"));
-				temp.setMainInfo(rs.getString("main_info"));
-
-				results.add(temp);
-			}*/
 			results = convertToJSON(rs);
 
 
@@ -176,31 +164,18 @@ public class SOSModel
 	public StandardResult getUserById(String userId){
 
 		//TODO search by userId
-
-		String query = "SELECT user_id, first_name, last_name, email, main_info "
-				+ "FROM users";
+	String query = "SELECT user_id, first_name, last_name, email, main_info "
+				+ "FROM users WHERE user_id='"+userId+"'";
+		
+				
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results = new ArrayList<Standard>();
 
 		try{
+			
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
-
-			
-			/*
-			while (rs.next()){
-
-				User temp = new User();
-
-				temp.setUserID(rs.getString("user_id"));
-				temp.setFirstName(rs.getString("first_name"));
-				temp.setLastName(rs.getString("last_name"));
-				temp.setEmail(rs.getString("email"));
-				temp.setMainInfo(rs.getString("main_info"));
-
-				results.add(temp);
-			}*/
 			
 			results = convertToJSON(rs);
 			
@@ -237,7 +212,7 @@ public class SOSModel
 	public StandardResult doLogin(String email, String password){
 
 		//TODO search for user by email and password. Return entire user object?
-		String query = "";
+		String query = "SELECT * FROM users WHERE email= '" +email+"' and password= '"+password+"'";
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results = new ArrayList<Standard>();
@@ -267,12 +242,54 @@ public class SOSModel
 
 	}
 
+	
+	
+	public StandardResult createQuestion(String userId, double latitude, double longitude, 
+			String text, List<String> tags, int tutor, int studyGroup){
 
+
+		String query = 
+				"INSERT INTO questions (user_id, latitude, longitude, text, tutor, study_group)"
+				+ "VALUES ('"+userId+"', '"+latitude+"','"+longitude+"','"+text+"',"
+						+ "'" +tutor+"','"+studyGroup+"')";
+
+		StandardResult finalResult = new StandardResult();
+		List <Standard> results = new ArrayList<Standard>();		
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			if (results.size() > 0){
+				finalResult.setExpectResults(1);
+			}
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			if(error.getErrorCode() == 1062){
+				finalResult.setResult("Email address is already in use");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+	}
+	
+	
+	
 
 	public StandardResult getQuestions(String latitude, String longitude,  List<String> tags, int limit) {
 
-		//TODO
-		String query = "";
+		//TODO Add Tag check to add to tag list
+		String query = "select * from questions";
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results;
@@ -298,17 +315,16 @@ public class SOSModel
 		return finalResult;
 	}
 
-
 	
 	/**
 	 * Return question info
-	 * @param questionId - unique question id
+	 * @param question - unique question id
 	 * @return 
 	 */
-	public StandardResult viewQuestion(String questionId) {
+	public StandardResult viewQuestion(int questionId) {
 
 		//TODO
-		String query = "";
+		String query = "SELECT * FROM questions where question_id='"+questionId+"'";
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results;
@@ -342,10 +358,11 @@ public class SOSModel
 	 * @param userId
 	 * @return
 	 */
-	public StandardResult askToJoinGroup(String questionId, String userId) {
+	public StandardResult askToJoinGroup(int questionId, String userId) {
 
 		//TODO notify group leader. add asking userId to "waiting for response" list? (for UI)
-		String query = "";
+		String query = "SELECT device_id FROM users JOIN questions ON (users.user_id = questions.user_id"
+				+ " AND questions.question_id = "+questionId+")";
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results;
@@ -365,7 +382,7 @@ public class SOSModel
 			//If we get here, we can send a notification
 			//to group leader
 			List<String> devices = null;
-			sendNotification( devices );
+			//sendNotification( devices );
 			
 
 		}
@@ -378,30 +395,25 @@ public class SOSModel
 	}
 	
 	
-	public StandardResult acceptUser(String questionId, String userId) {
+	public StandardResult acceptUser(int questionId, String userId) {
 
 		//TODO add userId to group membber list and send notification
-		String query = "";
+		String query = "INSERT INTO members (question_id, user_id) VALUES ("+questionId+",'"+userId+"')";
 
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results;
 
 		try{
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			stmt.executeUpdate(query);
 
-			results = convertToJSON(rs);
-			
+		
 			finalResult.setSuccess(1);
-			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
 			
 			//If we get here, we can send a notification
 			//to asking user
 			List<String> devices = null;
-			sendNotification( devices );
+			//sendNotification( devices );
 			
 
 		}
@@ -411,31 +423,7 @@ public class SOSModel
 
 		closeConnection();
 		return finalResult;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-	
-	
-	
+	}	
 	
 
 	public static JSONArray convertToJSON(ResultSet resultSet) throws Exception {

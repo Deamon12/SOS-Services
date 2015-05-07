@@ -80,19 +80,25 @@ public class MainController {
 	@GET
 	@Path ("/createQuestion")
 	@Produces ("application/json")
-	public String createQuestion(@QueryParam("latitude") String latitude, 
-			@QueryParam("longitude") String longitude, @QueryParam("tags") List<String> tags,
-			@QueryParam("limit") int limit, @QueryParam("userId") String userId, 
-			@QueryParam("questionText") String questionText){
+	public String createQuestion(
+			@QueryParam("userId") String userId, 
+			@QueryParam("latitude") double latitude, 
+			@QueryParam("longitude") double longitude, 
+			@QueryParam("text") String text,
+			@QueryParam("tags") List<String> tags,
+			@QueryParam("tutor") int tutor,
+			@QueryParam("studyGroup") int studyGroup
+			){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.getQuestions(latitude, longitude, tags, limit));
+		return new Gson().toJson(model.createQuestion(userId, latitude, 
+				longitude, text, tags, tutor, studyGroup));
 	}
 	
 	@GET
 	@Path ("/viewQuestion")
 	@Produces ("application/json")
-	public String viewQuestion(@QueryParam("questionId") String questionId){
+	public String viewQuestion(@QueryParam("questionId") int questionId){
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.viewQuestion(questionId));
@@ -102,7 +108,7 @@ public class MainController {
 	@GET
 	@Path ("/askToJoinGroup")
 	@Produces ("application/json")
-	public String askToJoinGroup(@QueryParam("questionId") String questionId, 
+	public String askToJoinGroup(@QueryParam("questionId") int questionId, 
 			@QueryParam("userId") String userId){
 		
 		SOSModel model = new SOSModel();
@@ -113,11 +119,11 @@ public class MainController {
 	@GET
 	@Path ("/acceptUser")
 	@Produces ("application/json")
-	public String acceptUser(@QueryParam("questionId") String questionId, 
+	public String acceptUser(@QueryParam("questionId") int questionId, 
 			@QueryParam("userId") String userId){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.askToJoinGroup(questionId, userId));
+		return new Gson().toJson(model.acceptUser(questionId, userId));
 	}
 	
 	
