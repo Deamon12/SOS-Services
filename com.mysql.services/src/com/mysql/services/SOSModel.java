@@ -107,17 +107,24 @@ public class SOSModel
 	 */
 	public StandardResult createUser(String firstName, String lastName, String password, 
 			String email, String deviceId){
+		
+		String userId = createUserId();
 
 		String query = 
 				"INSERT INTO users (user_id, first_name, last_name, password, email, active, device_id, school, major)"
-						+ " VALUES ('"+createUserId()+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
-						+ "'"+deviceId+"' , null , null)";
+						+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
+						+ " , null , null)";
+		String query2 = 
+				"INSERT INTO device (device_id, user_id)"
+				+ "VALUES ('"+deviceId+"', '"+userId+"')";
+				
 
 		StandardResult finalResult = new StandardResult();	
 
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
+			stmt.executeUpdate(query2);
 
 
 			finalResult.setSuccess(1);
@@ -248,9 +255,6 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
-			if(error.getErrorCode() == 1062){
-				finalResult.setResult("Email address is already in use");
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
