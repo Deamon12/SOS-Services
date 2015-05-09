@@ -1,10 +1,8 @@
 package com.mysql.services;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -12,7 +10,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.google.android.gcm.demo.server.Datastore;
 import com.google.gson.Gson;
-import com.sos.gcm.GoogleCloudMessaging;
 
 @Path ("/serviceclass")
 public class MainController {
@@ -23,7 +20,8 @@ public class MainController {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String sayPlainTextHello() {
-		return "Test Call from MainController class";
+		
+		return "Test Call from MainController class. With Recent Changes";
 	}
 	
 	
@@ -39,8 +37,11 @@ public class MainController {
 	@GET
 	@Path("/createUser")
 	@Produces("application/json")
-	public String createUser(@QueryParam("firstName") String firstName, @QueryParam("lastName") String lastName,
-			@QueryParam("password") String password, @QueryParam("email") String email, 
+	public String createUser(
+			@QueryParam("firstName") String firstName, 
+			@QueryParam("lastName") String lastName,
+			@QueryParam("password") String password, 
+			@QueryParam("email") String email, 
 			@QueryParam("deviceId") String deviceId){
 		
 		SOSModel model = new SOSModel();
@@ -59,7 +60,9 @@ public class MainController {
 	@GET
 	@Path ("/doLogin")
 	@Produces ("application/json")
-	public String doLogin(@QueryParam("email") String email, @QueryParam("password") String password){
+	public String doLogin(
+			@QueryParam("email") String email, 
+			@QueryParam("password") String password){
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.doLogin(email, password));
@@ -68,8 +71,10 @@ public class MainController {
 	@GET
 	@Path ("/getQuestions")
 	@Produces ("application/json")
-	public String getQuestions(@QueryParam("latitude") String latitude, 
-			@QueryParam("longitude") String longitude, @QueryParam("tags") List<String> tags,
+	public String getQuestions(
+			@QueryParam("latitude") String latitude, 
+			@QueryParam("longitude") String longitude, 
+			@QueryParam("tags") List<String> tags,
 			@QueryParam("limit") int limit){
 		
 		SOSModel model = new SOSModel();

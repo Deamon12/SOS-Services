@@ -82,7 +82,7 @@ public class SOSModel
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
 			if (results.size() > 0){
-				finalResult.setExpectResults(1);
+				finalResult.setExpectResults(results.size());
 			}
 
 		}
@@ -108,41 +108,27 @@ public class SOSModel
 	public StandardResult createUser(String firstName, String lastName, String password, 
 			String email, String deviceId){
 
-		//TODO Check to see if this userId exists in database already?
-		//TODO Save DeviceId
-		String userId = createUserId();
-
-
 		String query = 
-				"INSERT INTO users (user_id, first_name, last_name, password, email, active, description, main_info)"
-						+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True,"
-						+ " null , null)";
+				"INSERT INTO users (user_id, first_name, last_name, password, email, active, device_id, school, major)"
+						+ " VALUES ('"+createUserId()+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
+						+ "'"+deviceId+"' , null , null)";
 
-		//TODO Add (FROM) return or move return user info to another call?
-
-		StandardResult finalResult = new StandardResult();
-		List <Standard> results = new ArrayList<Standard>();		
+		StandardResult finalResult = new StandardResult();	
 
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
-			ResultSet rs = stmt.executeQuery(query);   //TODO change to updateQuery of not returning result
-			
-			results = convertToJSON(rs);
 
 
 			finalResult.setSuccess(1);
-			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setResult("successfully created account");
 
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
-			if(error.getErrorCode() == 1062){
-				finalResult.setResult("Email address is already in use");
-			}
+			
+			finalResult.setResult(error.getMessage());
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -161,11 +147,10 @@ public class SOSModel
 	public StandardResult getUserById(String userId){
 
 		//TODO search by userId
-	String query = "SELECT user_id, first_name, last_name, email, main_info "
+	String query = "SELECT user_id, first_name, last_name, email, school, major "
 				+ "FROM users WHERE user_id='"+userId+"'";
 		
-				
-
+		
 		StandardResult finalResult = new StandardResult();
 		List <Standard> results = new ArrayList<Standard>();
 
@@ -179,10 +164,8 @@ public class SOSModel
 
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
-
+			finalResult.setExpectResults(results.size());
+			
 
 		}
 		catch (SQLException error){
@@ -222,9 +205,8 @@ public class SOSModel
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setExpectResults(results.size());
+			
 
 		}
 		catch (SQLException error){
@@ -260,9 +242,8 @@ public class SOSModel
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setExpectResults(results.size());
+			
 
 		}
 		catch (SQLException error){
@@ -299,9 +280,7 @@ public class SOSModel
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setExpectResults(results.size());
 
 		}
 		catch (Exception error){
@@ -334,9 +313,7 @@ public class SOSModel
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setExpectResults(results.size());
 
 		}
 		catch (Exception error){
@@ -372,9 +349,7 @@ public class SOSModel
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
-			if (results.size() > 0){
-				finalResult.setExpectResults(1);
-			}
+			finalResult.setExpectResults(results.size());
 			
 			//If we get here, we can send a notification
 			//to group leader

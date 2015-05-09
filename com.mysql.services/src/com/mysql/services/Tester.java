@@ -2,21 +2,19 @@ package com.mysql.services;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class Tester {
 
 	public static void main(String[] args) {
 	
-		//String securePassword = Encrypt.get_SHA_1_SecurePassword("password");
+		String securePassword = Encrypt.get_SHA_1_SecurePassword("password");
 		
-		//System.out.println(new MainController().createUser("Jimbo", "Jones", securePassword, "email4@email.com"));
+		System.out.println(new MainController().createUser("Jimbo", "Jones", securePassword, "email4@email.com", "1234"));
 		
 		//System.out.println(new MainController().doLogin("email@email.com", "password"));
 		
-		System.out.println(new MainController().acceptUser(3, "mingyuhu"));
+		//System.out.println(new MainController().doLogin("aksdjf@ucsd.edu", "asdf"));
 		//System.out.println(new MainController().createQuestion( "user1", 0, 0, securePassword, null, 0, 0));
 		
 		/*
