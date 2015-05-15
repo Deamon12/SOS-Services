@@ -309,6 +309,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			
 			JSONArray temp = new JSONArray();
+			JSONArray tagtemp = new JSONArray();
 
 			//get questionId to later use to add into question_tag table
 			String getQuestionId=
@@ -337,15 +338,17 @@ public class SOSModel
 				alltags = alltags+", '"+tags.get(a)+"'";
 			}
 
+			if(tags.size()>0){
 			//get all tag_id's for the tags that are selected
 			String getTagId = 
                         "SELECT tag_id FROM tags WHERE tag IN ("+alltags+")";
 				rs = stmt.executeQuery(getTagId);
-				temp = convertToJSON(rs);
-
+				tagtemp = convertToJSON(rs);
+			}
+				
 			//link question to tags
-			for (int j=0; j<temp.length(); j++){
-				JSONObject obj = temp.getJSONObject(j);
+			for (int j=0; j<tagtemp.length(); j++){
+				JSONObject obj = tagtemp.getJSONObject(j);
 				int id = obj.getInt("tag_id");
 			    
 				String insertQuestionTag = 
@@ -355,10 +358,10 @@ public class SOSModel
 				
 			}
 
-				String addMember = 
-						"INSERT INTO members (question_id, user_id)"
-						+ "VALUES ('"+questionId+"', '"+userId+"')";
-				stmt.executeUpdate(addMember);
+			String addMember = 
+				"INSERT INTO members (question_id, user_id)"
+					+ "VALUES ('"+questionId+"', '"+userId+"')";
+			stmt.executeUpdate(addMember);
 			
 			
 			finalResult.setSuccess(1);
@@ -391,7 +394,7 @@ public class SOSModel
 		String query = "";
 		if(tags.isEmpty()){
 			query = "SELECT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ "q.latitude, q.longitude, q.topic FROM questions AS a INNER JOIN users as u ON u.user_id = q.user_id"
+					+ "q.latitude, q.longitude, q.topic FROM questions AS q INNER JOIN users as u ON u.user_id = q.user_id"
 					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong;
 		}
 		else{
@@ -489,7 +492,7 @@ public class SOSModel
 	 * @return 
 	 */
 	public StandardResult askToJoinGroup(int questionId, String userId) {
-
+		//TODO showup user info 
 		//TODO notify group leader. add asking userId to "waiting for response" list? (for UI)
 		String query = "SELECT device_id FROM users JOIN questions ON (users.user_id = questions.user_id"
 				+ " AND questions.question_id = "+questionId+")";
