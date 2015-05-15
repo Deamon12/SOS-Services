@@ -70,6 +70,28 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/forgotPassword")
+	@Produces ("application/json")
+	public String forgotPassword(
+			@QueryParam("email") String email)
+			{
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.forgotPassword(email));
+	}
+	
+	@GET
+	@Path ("/resetPassword")
+	@Produces ("application/json")
+	public String resetPassword(
+			@QueryParam("email") String email, 
+			@QueryParam("password") String password){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.resetPassword(email, password));
+	}
+	
+	@GET
 	@Path ("/getQuestions")
 	@Produces ("application/json")
 	public String getQuestions(
@@ -93,12 +115,13 @@ public class MainController {
 			@QueryParam("text") String text,
 			@QueryParam("tags") List<String> tags,
 			@QueryParam("tutor") int tutor,
-			@QueryParam("studyGroup") int studyGroup
+			@QueryParam("studyGroup") int studyGroup,
+			@QueryParam("topic") String topic
 			){
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.createQuestion(userId, latitude, 
-				longitude, text, tags, tutor, studyGroup));
+				longitude, text, tags, tutor, studyGroup, topic));
 	}
 	
 	@GET

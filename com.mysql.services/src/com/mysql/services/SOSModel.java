@@ -233,17 +233,73 @@ public class SOSModel
 		return finalResult;
 
 	}
+	public StandardResult forgotPassword(String email){
 
+		//TODO search for user by email and password
+		String query = "SELECT user_id, first_name, last_name FROM users WHERE email= '" +email+"'";
+
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
+			
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
+	
+	public StandardResult resetPassword(String email, String password){
+
+		//TODO search for user by email and password
+		String query = "UPDATE users SET password = '"+password+"' WHERE email = '"+email+"'";
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
 	
 	
 	public StandardResult createQuestion(String userId, double latitude, double longitude, 
-			String text, List<String> tags, int tutor, int studyGroup){
+			String text, List<String> tags, int tutor, int studyGroup, String topic){
 
 		//inserts new question into questions table
 		String query = 
-				"INSERT INTO questions (user_id, latitude, longitude, text, tutor, study_group)"
+				"INSERT INTO questions (user_id, latitude, longitude, text, tutor, study_group, topic)"
 				+ "VALUES ('"+userId+"', '"+latitude+"','"+longitude+"','"+text+"',"
-						+ "'" +tutor+"','"+studyGroup+"')";
+						+ "'" +tutor+"','"+studyGroup+"', '"+topic+"')";
 		
 
 		StandardResult finalResult = new StandardResult();
@@ -335,7 +391,7 @@ public class SOSModel
 		String query = "";
 		if(tags.isEmpty()){
 			query = "SELECT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ "q.latitude, q.longitude FROM questions AS a INNER JOIN users as u ON u.user_id = q.user_id"
+					+ "q.latitude, q.longitude, q.topic FROM questions AS a INNER JOIN users as u ON u.user_id = q.user_id"
 					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong;
 		}
 		else{
@@ -347,7 +403,7 @@ public class SOSModel
 				alltags = alltags+", '"+tags.get(a)+"'";
 			}
 			query = "SELECT DISTINCT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ " q.latitude, q.longitude FROM questions AS q INNER JOIN question_tag AS qt "
+					+ " q.latitude, q.longitude, q.topic FROM questions AS q INNER JOIN question_tag AS qt "
 					+ "ON q.question_id = qt.question_id INNER JOIN tags AS t on qt.tag_id = t.tag_id INNER JOIN users AS u ON "
 					+ "u.user_id=q.user_id WHERE t.tag IN ("
 					+alltags+" ) AND q.latitude BETWEEN "+minLat+" AND "+maxLat+" AND q.longitude BETWEEN "
@@ -386,7 +442,7 @@ public class SOSModel
 
 		//get question info
 		String query = "SELECT q.date, q.study_group, q.latitude, q.longitude, q.active, q.text, q.tutor, u.first_name, u.last_name,"
-				+ "u.image, u.user_id FROM questions as q INNER JOIN users as u ON q.user_id = u.user_id WHERE q.question_id = '"
+				+ "u.image, u.user_id, q.topic FROM questions as q INNER JOIN users as u ON q.user_id = u.user_id WHERE q.question_id = '"
 				+questionId+"'";
 		//get each separate tag associated with question
 		String getTags = "SELECT tags.tag FROM tags INNER JOIN question_tag ON question_tag.tag_id = tags.tag_id"

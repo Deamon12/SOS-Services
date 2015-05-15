@@ -22,11 +22,12 @@ public class Tester {
 		List<String> tags = new ArrayList<String>();
 		tags.add("there");
 		//tags.add("hello");
-		System.out.println(new MainController().createQuestion( "user1", 0, 0, securePassword, tags, 0, 0));
+		//System.out.println(new MainController().createQuestion( "user1", 0, 0, securePassword, tags, 0, 0, "CSE110"));
 		//System.out.println(new MainController().viewQuestion(32));
 		
 		//System.out.println(new MainController().getQuestions(1.00, 2.00, tags, 25.00));
 		//System.out.println(new MainController().acceptUser(3, "user1"));
+		//System.out.println(new MainController().resetPassword("madf@ucsd.edu", "HELOOOOOOOO"));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");
