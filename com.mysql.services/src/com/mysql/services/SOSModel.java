@@ -14,7 +14,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.mysql.results.Standard;
 import com.mysql.results.StandardResult;
 import com.sos.gcm.GoogleCloudMessaging;
 
@@ -290,6 +289,7 @@ public class SOSModel
 		return finalResult;
 
 	}
+
 	
 	
 	public StandardResult createQuestion(String userId, double latitude, double longitude, 
@@ -492,21 +492,30 @@ public class SOSModel
 	 * @return 
 	 */
 	public StandardResult askToJoinGroup(int questionId, String userId) {
-		//TODO showup user info 
+		//TODO show up user info 
 		//TODO notify group leader. add asking userId to "waiting for response" list? (for UI)
-		String query = "SELECT device_id FROM users JOIN questions ON (users.user_id = questions.user_id"
-				+ " AND questions.question_id = "+questionId+")";
+		String query = "SELECT d.device_id FROM device as d JOIN users as u ON u.user_id = d.user_id"
+				+ " JOIN questions AS q ON (u.user_id = q.user_id AND q.question_id = "+questionId+")";
 
-		String userInfo = "SELECT user_id, first_name, last_name, image FROM users WHERE user_id = '"+ userId;
+		String userInfo = "SELECT user_id, first_name, last_name, image FROM users WHERE user_id = '"+ userId+"'";
 		
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
+		JSONArray userResults;
 
 		try{
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
+			
+			Statement stmt1 = connection.createStatement();
+			ResultSet rs1 = stmt1.executeQuery(userInfo);
 
 			results = convertToJSON(rs);
+			userResults = convertToJSON(rs1);
+			
+			for(int i=0; i<userResults.length(); i++){
+				results.put(userResults.get(i));
+			}
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
@@ -538,7 +547,7 @@ public class SOSModel
 		StandardResult finalResult = new StandardResult();
         List<String> devices = new ArrayList();
 
-		try{
+		try{ 
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(getDevice);
@@ -563,6 +572,35 @@ public class SOSModel
 		return finalResult;
 	}	
 	
+	public StandardResult closeGroup(int questionId){
+
+		//remove question from questions, remove group members from members, remove tags related to question
+		String members = "DELETE FROM members WHERE question_id = "+questionId;
+		String tags = "DELETE FROM question_tag WHERE question_id = "+questionId;
+		String question = "DELETE FROM questions WHERE question_id = "+questionId;
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(members);
+			stmt.executeUpdate(tags);
+			stmt.executeUpdate(question);
+			
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
 
 	public static JSONArray convertToJSON(ResultSet resultSet) throws Exception {
         JSONArray jsonArray = new JSONArray();

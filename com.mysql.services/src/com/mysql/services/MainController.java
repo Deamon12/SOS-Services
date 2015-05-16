@@ -155,7 +155,15 @@ public class MainController {
 		return new Gson().toJson(model.acceptUser(questionId, userId));
 	}
 	
-	
+
+	@GET
+	@Path ("/closeGroup")
+	@Produces ("application/json")
+	public String closeGroup(@QueryParam("questionId") int questionId){ 
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.closeGroup(questionId));
+	}	
 	
 	
 	
