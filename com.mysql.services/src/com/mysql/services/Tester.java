@@ -33,6 +33,7 @@ public class Tester {
 		//System.out.println(new MainController().hasQuestion("mingyuhu"));
 		//System.out.println(new MainController().addComment(60, "user1", "comment"));
 		//System.out.println(new MainController().getComments(60));
+		System.out.println(new MainController().setVisibility(60, 1));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");

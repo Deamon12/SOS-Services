@@ -443,7 +443,26 @@ public class SOSModel
 		return finalResult;
 	}
 	
-	
+	public StandardResult setVisibility(int questionId, int visible) {
+
+		String query = "UPDATE questions SET visible_location = "+visible+" WHERE question_id = '"+questionId+"'";
+		
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			//concatenate all the question info and tag info into 1 JSONArray
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			finalResult.setSuccess(1);
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}	
 	
 
 	public StandardResult getQuestions(double latitude, double longitude,  List<String> tags, double limit) {

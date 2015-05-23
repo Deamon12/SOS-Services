@@ -112,6 +112,17 @@ public class MainController {
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.hasQuestion(userId));
 	}
+
+	@GET
+	@Path ("/setVisibility")
+	@Produces ("application/json")
+	public String setVisibility(
+			@QueryParam("questionId") int questionId,
+			@QueryParam("visibility") int visible){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.setVisibility(questionId, visible));
+	}
 	
 	@GET
 	@Path ("/getQuestions")
