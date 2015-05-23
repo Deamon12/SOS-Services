@@ -107,16 +107,24 @@ public class SOSModel
 	 * @return success or failure
 	 */
 	public StandardResult createUser(String firstName, String lastName, String password, 
-			String email, String deviceId){
+			String email, String image, String deviceId){
 		
 		//create unique user ID
 		String userId = createUserId();
-
-		//query to insert into users table
-		String query = 
-				"INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major)"
-						+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
-						+ " null , null)";
+		String query = "";
+		//query to insert into users table with image
+		if (image!=null){
+                query = 
+                        "INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major, image)"
+                                + " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
+                                + " null , null, '" +image+"')";
+		}
+		else{
+                query = 
+					"INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major)"
+							+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
+							+ " null , null )";
+		}
 		//query to insert into device for push notifications
 		String device= 
 				"INSERT INTO device (device_id, user_id)"
@@ -159,7 +167,7 @@ public class SOSModel
 	public StandardResult getUserById(String userId){
 
 	//search by userId
-	String query = "SELECT user_id, first_name, last_name, email, school, major "
+	String query = "SELECT user_id, first_name, last_name, email, school, major, description, rating, image "
 				+ "FROM users WHERE user_id='"+userId+"'";
 		
 		
@@ -316,14 +324,46 @@ public class SOSModel
 
 	}	
 	
+	public StandardResult hasQuestion(String userId){
+
+		//TODO search for user by email and password
+		String query = "SELECT question_id FROM questions WHERE user_id= '" +userId+"'";
+
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
+			
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
+	
 	public StandardResult createQuestion(String userId, double latitude, double longitude, 
-			String text, List<String> tags, int tutor, int studyGroup, String topic){
+			String text, List<String> tags, int tutor, int studyGroup, String topic, int visibleLocation){
 
 		//inserts new question into questions table
 		String query = 
-				"INSERT INTO questions (user_id, latitude, longitude, text, tutor, study_group, topic)"
+				"INSERT INTO questions (user_id, latitude, longitude, text, tutor, study_group, topic, visible_location)"
 				+ "VALUES ('"+userId+"', '"+latitude+"','"+longitude+"','"+text+"',"
-						+ "'" +tutor+"','"+studyGroup+"', '"+topic+"')";
+						+ "'" +tutor+"','"+studyGroup+"', '"+topic+"', "+visibleLocation+")";
 		
 
 		StandardResult finalResult = new StandardResult();
@@ -421,7 +461,7 @@ public class SOSModel
 					+ "q.latitude, q.longitude, q.topic, q.tutor, q.study_group FROM questions AS q"
 					+ " INNER JOIN users as u ON u.user_id = q.user_id"
 					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong
-					+ "ORDER BY date DESC";
+					+ " AND visible_location = 1 ORDER BY date DESC";
 		}
 		else{
 			String alltags = "";
@@ -436,7 +476,7 @@ public class SOSModel
 					+ "ON q.question_id = qt.question_id INNER JOIN tags AS t on qt.tag_id = t.tag_id INNER JOIN users AS u ON "
 					+ "u.user_id=q.user_id WHERE t.tag IN ("
 					+alltags+" ) AND q.latitude BETWEEN "+minLat+" AND "+maxLat+" AND q.longitude BETWEEN "
-					+minLong+" AND "+maxLong+ "ORDER BY date DESC";
+					+minLong+" AND "+maxLong+ " AND visible_location = 1 ORDER BY date DESC";
 		}
 
 		StandardResult finalResult = new StandardResult();
@@ -509,6 +549,57 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	public StandardResult getComments(int questionId) {
+
+		String query = "SELECT u.first_name, u.last_name, u.image, c.comment, c.posted FROM comments AS c INNER JOIN "
+				+ "users AS u ON c.user_id = u.user_id WHERE c.question_id= '"+questionId+"' ORDER BY posted ASC";
+		
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			//concatenate all the question info and tag info into 1 JSONArray
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
+
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}
+	
+	public StandardResult addComment(int questionId, String userId, String comment) {
+
+		//get question info
+		String query = "INSERT INTO comments (question_id, user_id, comment) VALUES ("+questionId+", '"+userId+"', '"+comment+"')"; 
+		
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			//concatenate all the question info and tag info into 1 JSONArray
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			finalResult.setSuccess(1);
+
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}
+	
 	
 	/**
 	 * This is called when a person wants to join a group. Initiates notification scheme.
@@ -563,10 +654,10 @@ public class SOSModel
 	}
 	
 	
-	public StandardResult acceptUser(int questionId, String userId) {
+	public StandardResult acceptUser(int questionId, String userId, int tutor) {
 
 		//TODO add userId to group member list and send notification
-		String query = "INSERT INTO members (question_id, user_id) VALUES ("+questionId+",'"+userId+"')";
+		String query = "INSERT INTO members (question_id, user_id, tutor) VALUES ("+questionId+",'"+userId+"', "+tutor+")";
 		
 		String getDevice = "SELECT device_id FROM device WHERE user_id= '"+userId+"'";
 
@@ -578,7 +669,6 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(getDevice);
 
-			rs.first();
 			while(rs.next()){
 				devices.add(rs.getString("device_id"));
 			}
@@ -597,7 +687,42 @@ public class SOSModel
 
 		closeConnection();
 		return finalResult;
-	}	
+	}
+	
+	public StandardResult removeUser(String userId) {
+
+		//TODO add userId to group member list and send notification
+		String query = "DELETE FROM members WHERE user_id = '"+userId+"'";
+		
+		String getDevice = "SELECT device_id FROM device WHERE user_id= '"+userId+"'";
+
+		StandardResult finalResult = new StandardResult();
+        List<String> devices = new ArrayList();
+
+		try{ 
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			ResultSet rs = stmt.executeQuery(getDevice);
+
+			while(rs.next()){
+				devices.add(rs.getString("device_id"));
+			}
+		
+			finalResult.setSuccess(1);
+			
+			//send list of devices to sendNotification
+			System.out.println(devices);
+			//sendNotification( devices );
+			
+
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}
 	
 	public StandardResult closeGroup(int questionId){
 

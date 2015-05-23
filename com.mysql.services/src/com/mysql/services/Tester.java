@@ -25,11 +25,14 @@ public class Tester {
 		//System.out.println(new MainController().viewQuestion(3));
 		
 		//System.out.println(new MainController().getQuestions(1.00, 2.00, tags, 1010.00));
-		//System.out.println(new MainController().acceptUser(3, "user1"));
+		//System.out.println(new MainController().removeUser("user1"));
 		//System.out.println(new MainController().resetPassword("madf@ucsd.edu", "HELOOOOOOOO"));
 		//System.out.println(new MainController().askToJoinGroup(3, "mingyuhu"));
 		//System.out.println(new MainController().getTags());
-		System.out.println(new MainController().rateTutor("mingyuhu", false));
+		//System.out.println(new MainController().rateTutor("mingyuhu", false));
+		//System.out.println(new MainController().hasQuestion("mingyuhu"));
+		//System.out.println(new MainController().addComment(60, "user1", "comment"));
+		//System.out.println(new MainController().getComments(60));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");

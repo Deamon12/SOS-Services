@@ -43,10 +43,11 @@ public class MainController {
 			@QueryParam("lastName") String lastName,
 			@QueryParam("password") String password, 
 			@QueryParam("email") String email, 
+			@QueryParam("image") String image,
 			@QueryParam("deviceId") String deviceId){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.createUser(firstName, lastName, password, email, deviceId));
+		return new Gson().toJson(model.createUser(firstName, lastName, password, email, image, deviceId));
 	}
 
 	@GET
@@ -103,6 +104,16 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/hasQuestion")
+	@Produces ("application/json")
+	public String hasQuestion(
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.hasQuestion(userId));
+	}
+	
+	@GET
 	@Path ("/getQuestions")
 	@Produces ("application/json")
 	public String getQuestions(
@@ -127,12 +138,13 @@ public class MainController {
 			@QueryParam("tags") List<String> tags,
 			@QueryParam("tutor") int tutor,
 			@QueryParam("studyGroup") int studyGroup,
-			@QueryParam("topic") String topic
+			@QueryParam("topic") String topic,
+			@QueryParam("visibleLocation") int visibleLocation
 			){
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.createQuestion(userId, latitude, 
-				longitude, text, tags, tutor, studyGroup, topic));
+				longitude, text, tags, tutor, studyGroup, topic, visibleLocation));
 	}
 	
 	@GET
@@ -142,6 +154,26 @@ public class MainController {
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.viewQuestion(questionId));
+	}
+	
+	@GET
+	@Path ("/getComments")
+	@Produces ("application/json")
+	public String getComments(@QueryParam("questionId") int questionId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getComments(questionId));
+	}
+	
+	@GET
+	@Path ("/addComment")
+	@Produces ("application/json")
+	public String addComment(@QueryParam("questionId") int questionId,
+			@QueryParam("userId") String userId,
+			@QueryParam("comment") String comment){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.addComment(questionId, userId, comment));
 	}
 	
 	
@@ -160,10 +192,21 @@ public class MainController {
 	@Path ("/acceptUser")
 	@Produces ("application/json")
 	public String acceptUser(@QueryParam("questionId") int questionId, 
-			@QueryParam("userId") String userId){
+			@QueryParam("userId") String userId,
+			@QueryParam("tutor") int tutor){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.acceptUser(questionId, userId));
+		return new Gson().toJson(model.acceptUser(questionId, userId, tutor));
+	}
+	
+
+	@GET
+	@Path ("/removeUser")
+	@Produces ("application/json")
+	public String removeUser(@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.removeUser(userId));
 	}
 
 	@GET
