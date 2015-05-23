@@ -89,6 +89,8 @@ public class SOSModel
 		}
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
+
+			finalResult.setResult(error.getMessage());
 		}
 
 		closeConnection();
@@ -190,6 +192,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -231,6 +234,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -262,6 +266,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -288,6 +293,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -314,6 +320,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -346,6 +353,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -433,6 +441,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -455,6 +464,10 @@ public class SOSModel
 			stmt.executeUpdate(query);
 
 			finalResult.setSuccess(1);
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
 		}
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
@@ -512,6 +525,11 @@ public class SOSModel
 			finalResult.setExpectResults(results.length());
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -560,6 +578,11 @@ public class SOSModel
 			finalResult.setExpectResults(results.length());
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -588,6 +611,11 @@ public class SOSModel
 			finalResult.setExpectResults(results.length());
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -611,6 +639,11 @@ public class SOSModel
 			finalResult.setSuccess(1);
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -664,6 +697,11 @@ public class SOSModel
 			
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -700,6 +738,11 @@ public class SOSModel
 			
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -735,6 +778,11 @@ public class SOSModel
 			
 
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}
@@ -758,8 +806,10 @@ public class SOSModel
 
 		}
 		catch (SQLException error){
-			System.out.println("Error executing query: " + error);
-		} catch (Exception e) {
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -789,6 +839,7 @@ public class SOSModel
 		}
 		catch (SQLException error){
 			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -827,6 +878,11 @@ public class SOSModel
 			finalResult.setSuccess(1);
 			
 		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
 		catch (Exception error){
 			System.out.println("Error executing query: " + error);
 		}

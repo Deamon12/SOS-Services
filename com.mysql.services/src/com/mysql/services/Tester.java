@@ -21,7 +21,7 @@ public class Tester {
 		tags.add("there");
 		tags.add("helloe");
 		//System.out.println(new MainController().closeGroup(57));
-		//System.out.println(new MainController().createQuestion( "user1", 0, 0, securePassword, tags, 0, 0, "CSE110"));
+		System.out.println(new MainController().createQuestion( "5re8i03bqkuc03bm28pid8nq9l", 0, 0, securePassword, tags, 0, 0, "CSE110", 1));
 		//System.out.println(new MainController().viewQuestion(3));
 		
 		//System.out.println(new MainController().getQuestions(1.00, 2.00, tags, 1010.00));
@@ -33,7 +33,7 @@ public class Tester {
 		//System.out.println(new MainController().hasQuestion("mingyuhu"));
 		//System.out.println(new MainController().addComment(60, "user1", "comment"));
 		//System.out.println(new MainController().getComments(60));
-		System.out.println(new MainController().setVisibility(60, 1));
+		//System.out.println(new MainController().setVisibility(60, 1));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");
