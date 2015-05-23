@@ -119,13 +119,13 @@ public class SOSModel
                 query = 
                         "INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major, image)"
                                 + " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
-                                + " null , null, '" +image+"')";
+                                + " '' , '', '" +image+"')";
 		}
 		else{
                 query = 
 					"INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major)"
 							+ " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
-							+ " null , null )";
+							+ " '' , '')";
 		}
 		//query to insert into device for push notifications
 		String device= 
@@ -205,7 +205,39 @@ public class SOSModel
 
 	}
 
+	public StandardResult updateProfile(String userId, String firstName, String lastName, String school, String major, 
+			String description, String image){
 
+        String query = "UPDATE users SET first_name = '"+firstName+"', last_name ='"+lastName+"', school ='"+school+"', "
+			+ "major= '"+major+"', description='"+description+"', image = '"+image+"' WHERE user_id = '"+userId+"'";
+		
+		
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			
+			finalResult.setSuccess(1);
+			
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+
+
+		closeConnection();
+
+		return finalResult;
+
+	}
 
 	/**
 	 * @param email
@@ -825,6 +857,7 @@ public class SOSModel
 		String members = "DELETE FROM members WHERE question_id = "+questionId;
 		String tags = "DELETE FROM question_tag WHERE question_id = "+questionId;
 		String question = "DELETE FROM questions WHERE question_id = "+questionId;
+		String comments = "DELETE FROM comments WHERE question_id = "+questionId;
 
 		StandardResult finalResult = new StandardResult();
 
@@ -833,6 +866,7 @@ public class SOSModel
 			stmt.executeUpdate(members);
 			stmt.executeUpdate(tags);
 			stmt.executeUpdate(question);
+			stmt.executeUpdate(comments);
 			
 			finalResult.setSuccess(1);
 
@@ -927,9 +961,6 @@ public class SOSModel
 		}
 
 	}
-
-
-
-
+	
 
 }

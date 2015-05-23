@@ -60,6 +60,21 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/updateProfile")
+	@Produces ("application/json")
+	public String updateProfile(@QueryParam("userId") String userId,
+			@QueryParam("firstName") String firstName,
+			@QueryParam("lastName") String lastName,
+			@QueryParam("school") String school,
+			@QueryParam("major") String major,
+			@QueryParam("description") String description,
+			@QueryParam("image") String image){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.updateProfile(userId, firstName, lastName, school, major, description, image));
+	}
+	
+	@GET
 	@Path ("/doLogin")
 	@Produces ("application/json")
 	public String doLogin(
@@ -247,24 +262,7 @@ public class MainController {
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.rateTutor(userId, like));
 	}	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	/**
