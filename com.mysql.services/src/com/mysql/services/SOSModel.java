@@ -69,7 +69,7 @@ public class SOSModel
 	public StandardResult getTags() {
 		//get all tag names and tag id's
 		String query = 
-				"SELECT * FROM tags";
+				"SELECT * FROM tags ORDER BY tag_id DESC";
 
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
@@ -290,7 +290,31 @@ public class SOSModel
 
 	}
 
-	
+	public StandardResult resetEmail(String email, String userId){
+
+		//TODO search for user by email and password
+		String query = "UPDATE users SET email = '"+email+"' WHERE user_id = '"+userId+"'";
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}	
 	
 	public StandardResult createQuestion(String userId, double latitude, double longitude, 
 			String text, List<String> tags, int tutor, int studyGroup, String topic){
@@ -359,8 +383,8 @@ public class SOSModel
 			}
 
 			String addMember = 
-				"INSERT INTO members (question_id, user_id)"
-					+ "VALUES ('"+questionId+"', '"+userId+"')";
+				"INSERT INTO members (question_id, user_id, tutor)"
+					+ "VALUES ('"+questionId+"', '"+userId+"', "+0+")";
 			stmt.executeUpdate(addMember);
 			
 			
@@ -394,8 +418,10 @@ public class SOSModel
 		String query = "";
 		if(tags.isEmpty()){
 			query = "SELECT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ "q.latitude, q.longitude, q.topic FROM questions AS q INNER JOIN users as u ON u.user_id = q.user_id"
-					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong;
+					+ "q.latitude, q.longitude, q.topic, q.tutor, q.study_group FROM questions AS q"
+					+ " INNER JOIN users as u ON u.user_id = q.user_id"
+					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong
+					+ "ORDER BY date DESC";
 		}
 		else{
 			String alltags = "";
@@ -406,11 +432,11 @@ public class SOSModel
 				alltags = alltags+", '"+tags.get(a)+"'";
 			}
 			query = "SELECT DISTINCT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ " q.latitude, q.longitude, q.topic FROM questions AS q INNER JOIN question_tag AS qt "
+					+ " q.latitude, q.longitude, q.topic, q.tutor, q.study_group FROM questions AS q INNER JOIN question_tag AS qt "
 					+ "ON q.question_id = qt.question_id INNER JOIN tags AS t on qt.tag_id = t.tag_id INNER JOIN users AS u ON "
 					+ "u.user_id=q.user_id WHERE t.tag IN ("
 					+alltags+" ) AND q.latitude BETWEEN "+minLat+" AND "+maxLat+" AND q.longitude BETWEEN "
-					+minLong+" AND "+maxLong;
+					+minLong+" AND "+maxLong+ "ORDER BY date DESC";
 		}
 
 		StandardResult finalResult = new StandardResult();
@@ -552,6 +578,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(getDevice);
 
+			rs.first();
 			while(rs.next()){
 				devices.add(rs.getString("device_id"));
 			}
@@ -573,6 +600,32 @@ public class SOSModel
 	}	
 	
 	public StandardResult closeGroup(int questionId){
+
+		//remove question from questions, remove group members from members, remove tags related to question
+		String inactivate = "UPDATE questions SET active = 0 WHERE question_id = '"+questionId+"'";
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(inactivate);
+			
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
+	
+	public StandardResult removeGroup(int questionId){
 
 		//remove question from questions, remove group members from members, remove tags related to question
 		String members = "DELETE FROM members WHERE question_id = "+questionId;
@@ -600,6 +653,42 @@ public class SOSModel
 
 		return finalResult;
 
+	}
+	
+	public StandardResult rateTutor(String userId, boolean like) {
+
+		//TODO add userId to group member list and send notification
+		String getRating= "SELECT rating FROM users WHERE user_id = '"+userId+"'";
+		
+		StandardResult finalResult = new StandardResult();
+
+		try{ 
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(getRating);
+			
+			rs.first();
+			int currRating = rs.getInt("rating");
+			System.out.println(currRating);
+			
+			if (like == true){
+				currRating++;
+			}
+			else{
+				currRating--;
+			}
+			
+			String setRating = "UPDATE users SET rating = "+currRating+" WHERE user_id = '"+userId+"'";
+			stmt.executeUpdate(setRating);
+		
+			finalResult.setSuccess(1);
+			
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
 	}
 
 	public static JSONArray convertToJSON(ResultSet resultSet) throws Exception {

@@ -92,6 +92,17 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/resetEmail")
+	@Produces ("application/json")
+	public String resetEmail(
+			@QueryParam("email") String email, 
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.resetEmail(email, userId));
+	}
+	
+	@GET
 	@Path ("/getQuestions")
 	@Produces ("application/json")
 	public String getQuestions(
@@ -154,7 +165,6 @@ public class MainController {
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.acceptUser(questionId, userId));
 	}
-	
 
 	@GET
 	@Path ("/closeGroup")
@@ -163,8 +173,26 @@ public class MainController {
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.closeGroup(questionId));
+	}		
+
+	@GET
+	@Path ("/removeGroup")
+	@Produces ("application/json")
+	public String removeGroup(@QueryParam("questionId") int questionId){ 
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.removeGroup(questionId));
 	}	
 	
+	@GET
+	@Path ("/rateTutor")
+	@Produces ("application/json")
+	public String rateTutor(@QueryParam("userId") String userId,
+			@QueryParam("like") boolean like){ 
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.rateTutor(userId, like));
+	}	
 	
 	
 	
