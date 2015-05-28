@@ -484,14 +484,165 @@ public class SOSModel
 		return finalResult;
 	}
 	
-	public StandardResult setVisibility(int questionId, int visible) {
+	public StandardResult removeAllTags(int questionId){
 
-		String query = "UPDATE questions SET visible_location = "+visible+" WHERE question_id = '"+questionId+"'";
+		String query = "DELETE FROM question_tag WHERE question_id = "+questionId;
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
+	
+	public StandardResult editQuestion(int questionId, String text, List<String> tags, int tutor,
+			int studyGroup, String topic, int visibleLocation){
+
+		//inserts new question into questions table
+		String edit = 
+				"UPDATE questions SET text = '"+text+"', tutor = "+tutor+", study_group="+studyGroup+","
+						+ "topic='"+topic+"', visible_location="+visibleLocation+" WHERE question_id = "+questionId;
+
+		String tag= "DELETE FROM question_tag WHERE question_id = "+questionId;
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			ResultSet rs;
+			stmt.executeUpdate(tag);
+			stmt.executeUpdate(edit);
+			
+			JSONArray temp = new JSONArray();
+			JSONArray tagtemp = new JSONArray();
+
+			String alltags = "";
+			for (int a=0; a<tags.size(); a++){
+                //if tags is not in tag table then add to tag table
+				String tagExist = 
+						"SELECT tag_id FROM tags WHERE tag = '"+tags.get(a)+"'";
+				rs = stmt.executeQuery(tagExist);
+				temp = convertToJSON(rs);
+				if(temp.length()==0){
+					String insertTag = 
+							"INSERT INTO tags (tag) VALUES ('"+tags.get(a)+"')";
+					stmt.executeUpdate(insertTag);
+				}
+				if (a == 0){
+					alltags = "'"+tags.get(a)+"'";
+				}
+				alltags = alltags+", '"+tags.get(a)+"'";
+			}
+
+			if(tags.size()>0){
+			//get all tag_id's for the tags that are selected
+			String getTagId = 
+                        "SELECT tag_id FROM tags WHERE tag IN ("+alltags+")";
+				rs = stmt.executeQuery(getTagId);
+				tagtemp = convertToJSON(rs);
+			}
+				
+			//link question to tags
+			for (int j=0; j<tagtemp.length(); j++){
+				JSONObject obj = tagtemp.getJSONObject(j);
+				int id = obj.getInt("tag_id");
+			    
+				String insertQuestionTag = 
+						"INSERT INTO question_tag (question_id, tag_id)"
+						+ "VALUES('"+questionId+"','"+id+"')";
+				stmt.executeUpdate(insertQuestionTag);
+				
+			}
+
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+	}
+	
+	public StandardResult editLocation(int questionId, double latitude, double longitude){
+
+		String query = "UPDATE questions SET latitude = "+latitude+", longitude = "+longitude
+				+ "WHERE question_id ="+questionId;
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
+	
+	public StandardResult changeOwner(int questionId, String userId) {
+
+		String query = "UPDATE questions SET user_id= '"+userId+"' WHERE question_id = "+questionId;
 		
 		StandardResult finalResult = new StandardResult();
 
 		try{
-			//concatenate all the question info and tag info into 1 JSONArray
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+
+			finalResult.setSuccess(1);
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}	
+	
+	public StandardResult setVisibility(int questionId, int visible) {
+
+		String query = "UPDATE questions SET visible_location = "+visible+" WHERE question_id = "+questionId;
+		
+		StandardResult finalResult = new StandardResult();
+
+		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
 
@@ -808,6 +959,40 @@ public class SOSModel
 			System.out.println(devices);
 			//sendNotification( devices );
 			
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+		}
+
+		closeConnection();
+		return finalResult;
+	}
+	
+	public StandardResult viewMembers(int questionId) {
+
+		//get question info
+		String query = "SELECT u.user_id, u.first_name, u.last_name, u.image,  m.tutor FROM members AS m INNER JOIN users AS u"
+				+ " ON m.user_id = u.user_id WHERE m.question_id = "+questionId;
+		
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			//concatenate all the question info and tag info into 1 JSONArray
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
 
 		}
 		catch (SQLException error){

@@ -129,6 +129,57 @@ public class MainController {
 	}
 
 	@GET
+	@Path ("/editQuestion")
+	@Produces ("application/json")
+	public String editQuestion(
+			@QueryParam("quesitonId") int questionId, 
+			@QueryParam("text") String text,
+			@QueryParam("tags") List<String> tags,
+			@QueryParam("tutor") int tutor,
+			@QueryParam("studyGroup") int studyGroup,
+			@QueryParam("topic") String topic,
+			@QueryParam("visibleLocation") int visibleLocation
+			){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.editQuestion(questionId,
+				text, tags, tutor, studyGroup, topic, visibleLocation));
+	}
+	
+	@GET
+	@Path ("/removeAllTags")
+	@Produces ("application/json")
+	public String removeAllTags(
+			@QueryParam("questionId") int questionId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.removeAllTags(questionId));
+	}
+	
+	@GET
+	@Path ("/editLocation")
+	@Produces ("application/json")
+	public String editLocation(
+			@QueryParam("questionId") int questionId, 
+			@QueryParam("latitude") double latitude, 
+			@QueryParam("longitude") double longitude){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.editLocation(questionId, latitude, longitude));
+	}
+	
+	@GET
+	@Path ("/changeOwner")
+	@Produces ("application/json")
+	public String changeOwner(
+			@QueryParam("questionId") int questionId,
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.changeOwner(questionId, userId));
+	}
+		
+	@GET
 	@Path ("/setVisibility")
 	@Produces ("application/json")
 	public String setVisibility(
@@ -233,6 +284,15 @@ public class MainController {
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.removeUser(userId));
+	}
+	
+	@GET
+	@Path ("/viewMembers")
+	@Produces ("application/json")
+	public String viewMembers(@QueryParam("questionId") int questionId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.viewMembers(questionId));
 	}
 
 	@GET
