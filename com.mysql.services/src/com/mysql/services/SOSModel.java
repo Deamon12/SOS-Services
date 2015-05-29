@@ -413,6 +413,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			
 			JSONArray temp = new JSONArray();
+			JSONArray question = new JSONArray();
 			JSONArray tagtemp = new JSONArray();
 
 			//get questionId to later use to add into question_tag table
@@ -421,8 +422,8 @@ public class SOSModel
 					+ " WHERE user_id = '"+userId+"'";
 			
 			ResultSet rs = stmt.executeQuery(getQuestionId);
-			temp = convertToJSON(rs);
-			int questionId = temp.getJSONObject(0).getInt("question_id");
+			question = convertToJSON(rs);
+			int questionId = question.getJSONObject(0).getInt("question_id");
 			
 			String alltags = "";
 			for (int a=0; a<tags.size(); a++){
@@ -469,6 +470,8 @@ public class SOSModel
 			
 			
 			finalResult.setSuccess(1);
+			finalResult.setResult(question);
+			finalResult.setExpectResults(question.length());
 
 		}
 		catch (SQLException error){
@@ -731,7 +734,7 @@ public class SOSModel
 
 		//get question info
 		String query = "SELECT q.date, q.study_group, q.latitude, q.longitude, q.active, q.text, q.tutor, u.first_name, u.last_name,"
-				+ "u.image, u.user_id, q.topic FROM questions as q INNER JOIN users as u ON q.user_id = u.user_id WHERE q.question_id = '"
+				+ "u.image, u.user_id, q.topic, q.visible_location FROM questions as q INNER JOIN users as u ON q.user_id = u.user_id WHERE q.question_id = '"
 				+questionId+"'";
 		//get each separate tag associated with question
 		String getTags = "SELECT tags.tag FROM tags INNER JOIN question_tag ON question_tag.tag_id = tags.tag_id"
@@ -776,7 +779,7 @@ public class SOSModel
 	
 	public StandardResult getComments(int questionId) {
 
-		String query = "SELECT u.first_name, u.last_name, u.image, c.comment, c.posted FROM comments AS c INNER JOIN "
+		String query = "SELECT u.user_id, u.first_name, u.last_name, u.image, c.comment, c.posted FROM comments AS c INNER JOIN "
 				+ "users AS u ON c.user_id = u.user_id WHERE c.question_id= '"+questionId+"' ORDER BY posted ASC";
 		
 		StandardResult finalResult = new StandardResult();
