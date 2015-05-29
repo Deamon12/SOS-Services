@@ -132,7 +132,7 @@ public class MainController {
 	@Path ("/editQuestion")
 	@Produces ("application/json")
 	public String editQuestion(
-			@QueryParam("quesitonId") int questionId, 
+			@QueryParam("questionId") int questionId, 
 			@QueryParam("text") String text,
 			@QueryParam("tags") List<String> tags,
 			@QueryParam("tutor") int tutor,
@@ -258,10 +258,11 @@ public class MainController {
 	@Path ("/askToJoinGroup")
 	@Produces ("application/json")
 	public String askToJoinGroup(@QueryParam("questionId") int questionId, 
-			@QueryParam("userId") String userId){
+			@QueryParam("userId") String userId,
+			@QueryParam("tutor") int tutor){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.askToJoinGroup(questionId, userId));
+		return new Gson().toJson(model.askToJoinGroup(questionId, userId, tutor));
 	}
 	
 	

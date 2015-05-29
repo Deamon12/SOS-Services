@@ -843,7 +843,7 @@ public class SOSModel
 	 * @param userId
 	 * @return 
 	 */
-	public StandardResult askToJoinGroup(int questionId, String userId) {
+	public StandardResult askToJoinGroup(int questionId, String userId, int tutor) {
 		//TODO show up user info 
 		//TODO notify group leader. add asking userId to "waiting for response" list? (for UI)
 		String query = "SELECT d.device_id FROM device as d JOIN users as u ON u.user_id = d.user_id"
@@ -868,6 +868,10 @@ public class SOSModel
 			for(int i=0; i<userResults.length(); i++){
 				results.put(userResults.get(i));
 			}
+			
+			JSONObject tut = new JSONObject();
+			tut.put("tutor", tutor);
+			results.put(tut);
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
@@ -1050,8 +1054,8 @@ public class SOSModel
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(members);
 			stmt.executeUpdate(tags);
-			stmt.executeUpdate(question);
 			stmt.executeUpdate(comments);
+			stmt.executeUpdate(question);
 			
 			finalResult.setSuccess(1);
 

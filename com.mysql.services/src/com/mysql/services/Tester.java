@@ -21,24 +21,25 @@ public class Tester {
 		tags.add("helloe");
 		tags.add("NEW TAGG!");
 		//System.out.println(new MainController().closeGroup(57));
-		//System.out.println(new MainController().createQuestion( "5re8i03bqkuc03bm28pid8nq9l", 0, 0, securePassword, tags, 0, 0, "CSE110", 1));
+		//System.out.println(new MainController().createQuestion( "4v64c6lsc8sic5udkfhpvb436h", 0, 0, securePassword, tags, 0, 0, "CSE110", 1));
 		//System.out.println(new MainController().viewQuestion(3));
 		
 		//System.out.println(new MainController().getQuestions(1.00, 2.00, tags, 1010.00));
 		//System.out.println(new MainController().removeUser("user1"));
 		//System.out.println(new MainController().resetPassword("madf@ucsd.edu", "HELOOOOOOOO"));
-		//System.out.println(new MainController().askToJoinGroup(3, "mingyuhu"));
+		System.out.println(new MainController().askToJoinGroup(3, "tutor", 1));
 		//System.out.println(new MainController().getTags());
 		//System.out.println(new MainController().rateTutor("mingyuhu", false));
 		//System.out.println(new MainController().hasQuestion("mingyuhu"));
-		//System.out.println(new MainController().addComment(60, "user1", "comment"));
+		//System.out.println(new MainController().addComment(64, "user1", "comment"));
 		//System.out.println(new MainController().getComments(60));
 		//System.out.println(new MainController().setVisibility(60, 1));
 		//System.out.println(new MainController().updateProfile("user1","HI", "LAST", "USCD", "CS", "ALSDFALKSDJF", null));
 		//System.out.println(new MainController().viewMembers(3));
 		//System.out.println(new MainController().editQuestion(3,"new TEXT!", tags, 1, 0, "CSE110", 1));
 		//System.out.println(new MainController().editLocation(3, 32.88, -117.23));
-		System.out.println(new MainController().changeOwner(3, "mingyuhu"));
+		//System.out.println(new MainController().changeOwner(3, "mingyuhu"));
+		//System.out.println(new MainController().removeGroup(64));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");
