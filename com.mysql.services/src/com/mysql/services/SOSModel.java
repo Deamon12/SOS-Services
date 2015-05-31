@@ -16,9 +16,16 @@ import org.json.JSONObject;
 
 import com.mysql.results.StandardResult;
 import com.sos.gcm.GoogleCloudMessaging;
+import com.mysql.services.Utilities;
+import com.mysql.services.Utilities.Encrypt;
 
 public class SOSModel
 {
+	final int addMember = 1;
+	final int addTutor = 2;
+	final int acceptUser = 3;
+	final int deleteUser = 4;
+	final int comment = 5;
 	private Connection connection;
 
 	public SOSModel(){
@@ -278,22 +285,18 @@ public class SOSModel
 	}
 	public StandardResult forgotPassword(String email){
 
+		String newpass = createPassword();
+		String securePassword = Encrypt.get_SHA_1_SecurePassword(newpass);
 		//TODO search for user by email and password
-		String query = "SELECT user_id, first_name, last_name FROM users WHERE email= '" +email+"'";
-
+		String updatePassword = "UPDATE users SET password = '"+securePassword+"' WHERE email= '"+email+"'";
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
 		try{
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			stmt.executeUpdate(updatePassword);
 
-			results = convertToJSON(rs);
-			
 			finalResult.setSuccess(1);
-			finalResult.setResult(results);
-			finalResult.setExpectResults(results.length());
-			
 
 		}
 		catch (SQLException error){
@@ -302,6 +305,8 @@ public class SOSModel
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		Utilities.sendEmail(email, newpass);
 
 		closeConnection();
 
@@ -309,10 +314,10 @@ public class SOSModel
 
 	}
 	
-	public StandardResult resetPassword(String email, String password){
+	public StandardResult resetPassword(String userId, String password){
 
 		//TODO search for user by email and password
-		String query = "UPDATE users SET password = '"+password+"' WHERE email = '"+email+"'";
+		String query = "UPDATE users SET password = '"+password+"' WHERE user_id= '"+userId+"'";
 
 		StandardResult finalResult = new StandardResult();
 
@@ -823,6 +828,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 
 			finalResult.setSuccess(1);
+			
 
 		}
 		catch (SQLException error){
@@ -857,6 +863,7 @@ public class SOSModel
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 		JSONArray userResults;
+        List<String> devices = new ArrayList();
 
 		try{
 			Statement stmt = connection.createStatement();
@@ -866,6 +873,10 @@ public class SOSModel
 			ResultSet rs1 = stmt1.executeQuery(userInfo);
 
 			results = convertToJSON(rs);
+			
+			for(int a=0; a<results.length(); a++){
+				devices.add(results.getJSONObject(a).getString("device_id"));
+			}
 			userResults = convertToJSON(rs1);
 			
 			for(int i=0; i<userResults.length(); i++){
@@ -882,9 +893,12 @@ public class SOSModel
 			
 			//If we get here, we can send a notification
 			//to group leader
-			List<String> devices = null;
-			//sendNotification( devices );
-			
+			if(tutor==1){
+				sendNotification(devices, userId, addTutor);
+			}
+			else{
+				sendNotification(devices, userId, addMember);
+			}
 
 		}
 		catch (SQLException error){
@@ -924,7 +938,7 @@ public class SOSModel
 			
 			//send list of devices to sendNotification
 			System.out.println(devices);
-			//sendNotification( devices );
+			sendNotification(devices, userId, acceptUser);
 			
 
 		}
@@ -964,7 +978,7 @@ public class SOSModel
 			
 			//send list of devices to sendNotification
 			System.out.println(devices);
-			//sendNotification( devices );
+			sendNotification(devices, userId, deleteUser);
 			
 
 		}
@@ -1137,17 +1151,22 @@ public class SOSModel
 		SecureRandom random = new SecureRandom();
 		return new BigInteger(130, random).toString(32);
 	}
+	
+	public static String createPassword(){
+		SecureRandom random = new SecureRandom();
+		return new BigInteger(40, random).toString(32);
+	}
 
 
 	/**
 	 * Send a notification to a list of devices via GoogleCloudMessaging
 	 * @param devices
 	 */
-	private void sendNotification(List<String> devices){
+	private void sendNotification(List<String> devices, String userId, int type){
 
 		GoogleCloudMessaging testing = new GoogleCloudMessaging();
 		try {
-			System.out.println( testing.sendMessage("Spaghetti Monster" , devices));
+			System.out.println( testing.sendMessage(type, userId, devices));
 		} catch (IOException error) {
 			System.out.println("Error executing query: " + error);
 		}

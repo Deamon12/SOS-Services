@@ -100,11 +100,11 @@ public class MainController {
 	@Path ("/resetPassword")
 	@Produces ("application/json")
 	public String resetPassword(
-			@QueryParam("email") String email, 
+			@QueryParam("userId") String userId, 
 			@QueryParam("password") String password){
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.resetPassword(email, password));
+		return new Gson().toJson(model.resetPassword(userId, password));
 	}
 	
 	@GET
@@ -325,68 +325,6 @@ public class MainController {
 	}	
 
 	
-	
-	/**
-	 * 
-	 * @param groupId - groupId; Use it to retrieve the userId who is hosting the group so we can notify them
-	 * @param userId - Person wanting to join the group
-	 * @return 
-	 */
-	/*
-	@Path ("/sendNotification")
-	@GET
-	@Produces("application/json")
-	public String sendNotification(@QueryParam("groupId") String groupId, @QueryParam("userId") String userId){
-		
-		
-		//SOSModel model = new SOSModel();
-		//return new Gson().toJson(model.sendNotification(groupId, userId));
-		
-		//GoogleCloudMessaging is our object that handles notificatoin calls
-		 
-				GoogleCloudMessaging testing = new GoogleCloudMessaging();
-				try {
-					
-					return testing.sendMessage("Message testing" , Datastore.getDevices());
-				} catch (IOException e) {
-					
-					return e.toString();
-				}
-				
-		
-		
-	}*/
-	
-	/*
-	@Path ("/sendNotification")
-	@GET
-	//@Produces(MediaType.TEXT_PLAIN)
-	@Produces("application/json")
-	public String sendNotification(@QueryParam("userId") String userId, @QueryParam("groupId") String userId){
-		
-		
-		
-		Datastore.clearDevices();
-		
-		String emulatorId = "APA91bEcFh1-Kgq_rcnmonKKTYhiwIqSxuHsaN90DeuaQKpr08b4jSScLQmL2b1W4_KPKvpYqAzQaeJS_18efcLdh9CxMXJNd2pTx0VG1M97rI9okHvj2rCYmCvTjiRPkukk4TdMQxiy-LXhrKnyods5sEMYrOx65Q";
-		String myId = "APA91bFYrg-EnRpTuwC1L9SugPGSZyLHCUNJDJnd2Iu7DVERg-F2TEC1DsF-i_INE0rYZQUsA4q1v_733RqwyDklfE8DLI5Y99jC1ef-sUa4I15Wb3Y20j0aevzZNRvYNgDG1Ir0JpdibWXLz4GGEQ_qX4fFJCg4Hw";
-		Datastore.register(myId);
-		Datastore.register(emulatorId);
-		
-		//GoogleCloudMessaging is our object that handles notificatoin calls
-		 
-		GoogleCloudMessaging testing = new GoogleCloudMessaging();
-		try {
-			
-			return testing.sendMessage("Message testing" , Datastore.getDevices());
-		} catch (IOException e) {
-			
-			return e.toString();
-		}
-	}*/
-	
-	
-	
 	@Path ("/gcmregister")
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -430,30 +368,5 @@ public class MainController {
 			return devices.size() + " device(s) registered!";
 		}
 	}
-	
-	/*
-	@Path ("/gcmtest")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String gcmTest() {
-		
-		if (devices.isEmpty()) {
-			System.out.print("No devices registered!");
-			return "No devices registered!";
-		} else {
-			System.out.print(devices.size() + " device(s) registered!");
-			return devices.size() + " device(s) registered!";
-		}
-		//return "devices: "+devices.toString();
-		
-		
-	}
-
-	*/
-	
-	
-	
-	
-	
 	
 }

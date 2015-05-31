@@ -17,5 +17,7 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/gcm-server.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/gson-2.3.1.jar"/>
 	<classpathentry kind="lib" path="/Users/cchdo/CSE110/sos-services/com.mysql.services/WebContent/WEB-INF/lib/java-json.jar"/>
+	<classpathentry kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK"/>
+	<classpathentry kind="lib" path="/Users/cchdo/CSE110/sos-services/com.mysql.services/WebContent/WEB-INF/lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

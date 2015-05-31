@@ -12,7 +12,7 @@ public class GoogleCloudMessaging {
 	final String GCM_API_KEY = "AIzaSyAhwbFKIDlDCHVHUB6D4TSCnGlXc-yeX-0";
 	final int RETRIES = 5;
 	
-	public String sendMessage(String messageText, List<String> devices) throws IOException{
+	public String sendMessage(int type, String userId, List<String> devices) throws IOException{
 		
 		String status;
 		if (devices.isEmpty()) {
@@ -20,7 +20,7 @@ public class GoogleCloudMessaging {
 		} 
 		else {
 			
-			Message message = new Message.Builder().build();
+			Message message = new Message.Builder().addData("type", ""+type).addData("userId", userId).build();
 			
 			MulticastResult result = new Sender(GCM_API_KEY).send(message, devices, RETRIES);
 			status = "Sent message to "+devices.size()+ " device(s): " + result;
