@@ -21,11 +21,10 @@ import com.mysql.services.Utilities.Encrypt;
 
 public class SOSModel
 {
-	final int addMember = 1;
-	final int addTutor = 2;
-	final int acceptUser = 3;
-	final int deleteUser = 4;
-	final int comment = 5;
+	private final int addMember = 1;
+	private final int addTutor = 2;
+	private final int acceptUser = 3;
+	private final int deleteUser = 4;
 	private Connection connection;
 
 	public SOSModel(){
@@ -254,7 +253,8 @@ public class SOSModel
 	public StandardResult doLogin(String email, String password){
 
 		//TODO search for user by email and password
-		String query = "SELECT * FROM users WHERE email= '" +email+"' and password= '"+password+"'";
+		String query = "SELECT user_id, first_name, last_name, date, image, email, active, rating, "
+				+ "description, school, major FROM users WHERE email= '" +email+"' and password= '"+password+"'";
 
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
@@ -264,6 +264,18 @@ public class SOSModel
 			ResultSet rs = stmt.executeQuery(query);
 
 			results = convertToJSON(rs);
+			String userId = results.getJSONObject(0).getString("user_id");
+			System.out.println(userId);
+
+			String getRatingList = "SELECT rated_user, rating FROM ratings WHERE user_id = '"+userId+"'";
+			
+			rs = stmt.executeQuery(getRatingList);
+			JSONArray ratingList = convertToJSON(rs);
+			
+			for(int i=0; i<ratingList.length(); i++){
+				JSONObject obj = ratingList.getJSONObject(i);
+				results.put(obj);
+				}
 			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
@@ -290,7 +302,6 @@ public class SOSModel
 		//TODO search for user by email and password
 		String updatePassword = "UPDATE users SET password = '"+securePassword+"' WHERE email= '"+email+"'";
 		StandardResult finalResult = new StandardResult();
-		JSONArray results;
 
 		try{
 			Statement stmt = connection.createStatement();
@@ -367,6 +378,39 @@ public class SOSModel
 		return finalResult;
 
 	}	
+	
+	public StandardResult inGroup(String userId){
+
+		//TODO search for user by email and password
+		String query = "SELECT question_id FROM members WHERE user_id= '" +userId+"'";
+
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
+			
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query: " + error);
+			finalResult.setResult(error.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
+	}
 	
 	public StandardResult hasQuestion(String userId){
 
@@ -894,10 +938,10 @@ public class SOSModel
 			//If we get here, we can send a notification
 			//to group leader
 			if(tutor==1){
-				sendNotification(devices, userId, addTutor);
+				sendNotification(devices, userId, addTutor, ""+questionId);
 			}
 			else{
-				sendNotification(devices, userId, addMember);
+				sendNotification(devices, userId, addMember, ""+questionId);
 			}
 
 		}
@@ -938,8 +982,7 @@ public class SOSModel
 			
 			//send list of devices to sendNotification
 			System.out.println(devices);
-			sendNotification(devices, userId, acceptUser);
-			
+			sendNotification(devices, userId, acceptUser, ""); 
 
 		}
 		catch (SQLException error){
@@ -978,7 +1021,7 @@ public class SOSModel
 			
 			//send list of devices to sendNotification
 			System.out.println(devices);
-			sendNotification(devices, userId, deleteUser);
+			sendNotification(devices, userId, deleteUser, "");
 			
 
 		}
@@ -1027,6 +1070,34 @@ public class SOSModel
 
 		closeConnection();
 		return finalResult;
+	}
+	
+	public StandardResult openGroup(int questionId){
+
+		//remove question from questions, remove group members from members, remove tags related to question
+		String activate = "UPDATE questions SET active = 1 WHERE question_id = '"+questionId+"'";
+
+		StandardResult finalResult = new StandardResult();
+
+		try{
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(activate);
+			
+			finalResult.setSuccess(1);
+
+		}
+		catch (SQLException error){
+			System.out.println("Error executing query, "+ error.getErrorCode()+" : " + error.getMessage());
+			finalResult.setResult(error.getMessage());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		closeConnection();
+
+		return finalResult;
+
 	}
 	
 	public StandardResult closeGroup(int questionId){
@@ -1090,29 +1161,35 @@ public class SOSModel
 
 	}
 	
-	public StandardResult rateTutor(String userId, boolean like) {
+	public StandardResult rateTutor(String userId, String ratedUserId, int like, boolean rated) {
 
 		//TODO add userId to group member list and send notification
-		String getRating= "SELECT rating FROM users WHERE user_id = '"+userId+"'";
+		String getRating= "SELECT rating FROM users WHERE user_id = '"+ratedUserId+"'";
+		
+		String updateRatingsTable; 
+		if (rated == true){
+			updateRatingsTable = "UPDATE ratings SET rating = "+like+" WHERE user_id = '"+userId+"' AND rated_user = '"+ratedUserId+"'";
+		}
+		else{
+			updateRatingsTable = "INSERT INTO ratings (rating, user_id, rated_user)"
+					+ "VALUES("+like+", '"+userId+"', '"+ratedUserId+"')";
+		}
 		
 		StandardResult finalResult = new StandardResult();
 
 		try{ 
 			Statement stmt = connection.createStatement();
+			stmt.executeUpdate(updateRatingsTable);
 			ResultSet rs = stmt.executeQuery(getRating);
 			
 			rs.first();
 			int currRating = rs.getInt("rating");
 			System.out.println(currRating);
 			
-			if (like == true){
-				currRating++;
-			}
-			else{
-				currRating--;
-			}
+			currRating = currRating + like;
+			System.out.println(currRating);
 			
-			String setRating = "UPDATE users SET rating = "+currRating+" WHERE user_id = '"+userId+"'";
+			String setRating = "UPDATE users SET rating = "+currRating+" WHERE user_id = '"+ratedUserId+"'";
 			stmt.executeUpdate(setRating);
 		
 			finalResult.setSuccess(1);
@@ -1162,11 +1239,11 @@ public class SOSModel
 	 * Send a notification to a list of devices via GoogleCloudMessaging
 	 * @param devices
 	 */
-	private void sendNotification(List<String> devices, String userId, int type){
+	private void sendNotification(List<String> devices, String userId, int type, String questionId){
 
 		GoogleCloudMessaging testing = new GoogleCloudMessaging();
 		try {
-			System.out.println( testing.sendMessage(type, userId, devices));
+			System.out.println( testing.sendMessage(questionId, type, userId, devices));
 		} catch (IOException error) {
 			System.out.println("Error executing query: " + error);
 		}

@@ -26,14 +26,15 @@ public class Tester {
 		//System.out.println(new MainController().closeGroup(57));
 		//System.out.println(new MainController().createQuestion( "4v64c6lsc8sic5udkfhpvb436h", 0, 0, securePassword, tags, 0, 0, "CSE110", 1));
 		//System.out.println(new MainController().viewQuestion(3));
-		System.out.println(new MainController().forgotPassword("mingyu.hu94@gmail.com"));
+		//System.out.println(new MainController().forgotPassword("mingyu.hu94@gmail.com"));
+		//System.out.println(new MainController().doLogin("madf@ucsd.edu", "HELOOOOOOOO"));
 		
 		//System.out.println(new MainController().getQuestions(1.00, 2.00, tags, 1010.00));
 		//System.out.println(new MainController().removeUser("user1"));
 		//System.out.println(new MainController().resetPassword("madf@ucsd.edu", "HELOOOOOOOO"));
 		//System.out.println(new MainController().askToJoinGroup(3, "tutor", 1));
 		//System.out.println(new MainController().getTags());
-		//System.out.println(new MainController().rateTutor("mingyuhu", false));
+		System.out.println(new MainController().rateTutor("mingyuhu","4v64c6lsc8sic5udkfhpvb436h", 1, true));
 		//System.out.println(new MainController().hasQuestion("mingyuhu"));
 		//System.out.println(new MainController().addComment(64, "user1", "comment"));
 		//System.out.println(new MainController().getComments(60));

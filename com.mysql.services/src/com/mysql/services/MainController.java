@@ -119,6 +119,16 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/inGroup")
+	@Produces ("application/json")
+	public String inGroup(
+			@QueryParam("userId") String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.inGroup(userId));
+	}
+	
+	@GET
 	@Path ("/hasQuestion")
 	@Produces ("application/json")
 	public String hasQuestion(
@@ -303,7 +313,16 @@ public class MainController {
 		
 		SOSModel model = new SOSModel();
 		return new Gson().toJson(model.closeGroup(questionId));
-	}		
+	}	
+
+	@GET
+	@Path ("/openGroup")
+	@Produces ("application/json")
+	public String openGroup(@QueryParam("questionId") int questionId){ 
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.openGroup(questionId));
+	}
 
 	@GET
 	@Path ("/removeGroup")
@@ -318,10 +337,12 @@ public class MainController {
 	@Path ("/rateTutor")
 	@Produces ("application/json")
 	public String rateTutor(@QueryParam("userId") String userId,
-			@QueryParam("like") boolean like){ 
+			@QueryParam("ratedUserId") String ratedUserId,
+			@QueryParam("like") int like,
+			@QueryParam("rated") boolean rated){ 
 		
 		SOSModel model = new SOSModel();
-		return new Gson().toJson(model.rateTutor(userId, like));
+		return new Gson().toJson(model.rateTutor(userId, ratedUserId, like, rated));
 	}	
 
 	
