@@ -36,6 +36,16 @@ public class MainController {
 	}
 	
 	@GET
+	@Path ("/getRateList")
+	@Produces ("application/json")
+	public String getRateList(
+			@QueryParam("userId")String userId){
+		
+		SOSModel model = new SOSModel();
+		return new Gson().toJson(model.getRateList(userId));
+	}
+	
+	@GET
 	@Path("/createUser")
 	@Produces("application/json")
 	public String createUser(

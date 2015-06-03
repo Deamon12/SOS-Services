@@ -12,11 +12,11 @@ public class Tester {
 
 	public static void main(String[] args) {
 		
-		String securePassword = Encrypt.get_SHA_1_SecurePassword("password");
+		String securePassword = Encrypt.get_SHA_1_SecurePassword("b0o8roq6");
 		//Utilities.sendEmail("hi", "newpass");
 		//System.out.println(new MainController().createUser("Jimbo", "Jones", securePassword, "mingyu.hu94@gmail.com", null,  "1234"));
 		
-		//System.out.println(new MainController().doLogin("email@email.com", "password"));
+		//System.out.println(new MainController().doLogin("brshi@ucsd.edu", "b0o8roq6"));
 		
 		//System.out.println(new MainController().doLogin("email4@email.com", securePassword));
 		List<String> tags = new ArrayList<String>();
@@ -34,7 +34,7 @@ public class Tester {
 		//System.out.println(new MainController().resetPassword("madf@ucsd.edu", "HELOOOOOOOO"));
 		//System.out.println(new MainController().askToJoinGroup(3, "tutor", 1));
 		//System.out.println(new MainController().getTags());
-		System.out.println(new MainController().rateTutor("mingyuhu","4v64c6lsc8sic5udkfhpvb436h", 1, true));
+		//System.out.println(new MainController().rateTutor("mingyuhu","gt81d1vvqpjrg4bkldgreuktfp", 1, false));
 		//System.out.println(new MainController().hasQuestion("mingyuhu"));
 		//System.out.println(new MainController().addComment(64, "user1", "comment"));
 		//System.out.println(new MainController().getComments(60));
@@ -45,6 +45,7 @@ public class Tester {
 		//System.out.println(new MainController().editLocation(3, 32.88, -117.23));
 		//System.out.println(new MainController().changeOwner(3, "mingyuhu"));
 		//System.out.println(new MainController().removeGroup(66));
+		//System.out.println(new MainController().getRateList("mingyuhu"));
 		
 		/*
 		System.out.println(distance(32.9697, -96.80322, 29.46786, -98.53506, "M") + " Miles");

@@ -102,6 +102,36 @@ public class SOSModel
 		closeConnection();
 		return finalResult;
 	}
+	
+	
+	public StandardResult getRateList(String userId) {
+		String query = 
+				"SELECT rated_user, rating FROM ratings WHERE user_id = '"+userId+"'";
+
+		StandardResult finalResult = new StandardResult();
+		JSONArray results;
+
+		try{
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			results = convertToJSON(rs);
+			
+			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
+
+		}
+		catch (Exception error){
+			System.out.println("Error executing query: " + error);
+
+			finalResult.setResult(error.getMessage());
+		}
+
+		closeConnection();
+		return finalResult;
+	}
+
 
 
 	/**
@@ -252,7 +282,6 @@ public class SOSModel
 	 */
 	public StandardResult doLogin(String email, String password){
 
-		//TODO search for user by email and password
 		String query = "SELECT user_id, first_name, last_name, date, image, email, active, rating, "
 				+ "description, school, major FROM users WHERE email= '" +email+"' and password= '"+password+"'";
 
@@ -264,19 +293,7 @@ public class SOSModel
 			ResultSet rs = stmt.executeQuery(query);
 
 			results = convertToJSON(rs);
-			String userId = results.getJSONObject(0).getString("user_id");
-			System.out.println(userId);
 
-			String getRatingList = "SELECT rated_user, rating FROM ratings WHERE user_id = '"+userId+"'";
-			
-			rs = stmt.executeQuery(getRatingList);
-			JSONArray ratingList = convertToJSON(rs);
-			
-			for(int i=0; i<ratingList.length(); i++){
-				JSONObject obj = ratingList.getJSONObject(i);
-				results.put(obj);
-				}
-			
 			finalResult.setSuccess(1);
 			finalResult.setResult(results);
 			finalResult.setExpectResults(results.length());
@@ -299,15 +316,24 @@ public class SOSModel
 
 		String newpass = createPassword();
 		String securePassword = Encrypt.get_SHA_1_SecurePassword(newpass);
-		//TODO search for user by email and password
+		System.out.println(newpass);
+		System.out.println(securePassword);
+		String getUser = "SELECT user_id, first_name, last_name FROM users WHERE email ='"+email+"'";
 		String updatePassword = "UPDATE users SET password = '"+securePassword+"' WHERE email= '"+email+"'";
 		StandardResult finalResult = new StandardResult();
-
+		JSONArray results;
+		
 		try{
 			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(getUser);
+			results = convertToJSON(rs);
+
 			stmt.executeUpdate(updatePassword);
 
+			
 			finalResult.setSuccess(1);
+			finalResult.setResult(results);
+			finalResult.setExpectResults(results.length());
 
 		}
 		catch (SQLException error){
@@ -725,10 +751,10 @@ public class SOSModel
 		String query = "";
 		if(tags.isEmpty()){
 			query = "SELECT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ "q.latitude, q.longitude, q.topic, q.tutor, q.study_group FROM questions AS q"
+					+ "q.latitude, q.longitude, q.topic, q.tutor, q.study_group, q.visible_location FROM questions AS q"
 					+ " INNER JOIN users as u ON u.user_id = q.user_id"
 					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong
-					+ " AND visible_location = 1 ORDER BY date DESC";
+					+ "AND q.active = 1 ORDER BY date DESC";
 		}
 		else{
 			String alltags = "";
@@ -739,11 +765,12 @@ public class SOSModel
 				alltags = alltags+", '"+tags.get(a)+"'";
 			}
 			query = "SELECT DISTINCT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
-					+ " q.latitude, q.longitude, q.topic, q.tutor, q.study_group FROM questions AS q INNER JOIN question_tag AS qt "
+					+ " q.latitude, q.longitude, q.topic, q.tutor, q.study_group, q.visible_location FROM questions AS q"
+					+ " INNER JOIN question_tag AS qt "
 					+ "ON q.question_id = qt.question_id INNER JOIN tags AS t on qt.tag_id = t.tag_id INNER JOIN users AS u ON "
 					+ "u.user_id=q.user_id WHERE t.tag IN ("
 					+alltags+" ) AND q.latitude BETWEEN "+minLat+" AND "+maxLat+" AND q.longitude BETWEEN "
-					+minLong+" AND "+maxLong+ " AND visible_location = 1 ORDER BY date DESC";
+					+minLong+" AND "+maxLong+ " AND q.active = 1 ORDER BY date DESC";
 		}
 
 		StandardResult finalResult = new StandardResult();

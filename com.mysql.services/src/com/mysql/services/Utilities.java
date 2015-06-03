@@ -3,10 +3,9 @@ package com.mysql.services;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.io.IOException;
-import com.amazonaws.services.simpleemail.*;
-import com.amazonaws.services.simpleemail.model.*;
-import com.amazonaws.regions.*;
-
+import java.util.Properties;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 public class Utilities {
 
@@ -95,51 +94,65 @@ public class Utilities {
 	}
 	
 	static void sendEmail(String sendTo, String password){
-		 
-	    final String FROM = "soscse110@gmail.com"; 
-	    final String TO = sendTo; 
-	    final String BODY = "This is your new password: "+ password +". Please log into your SOS account with this new password.";
-	    final String SUBJECT = "SOS reset password";
+		final String FROM = "soscse110@gmail.com";   
+	    final String TO = sendTo;  
 	    
-        // Construct an object to contain the recipient address.
-        Destination destination = new Destination().withToAddresses(new String[]{TO});
-        
-        // Create the subject and body of the message.
-        Content subject = new Content().withData(SUBJECT);
-        Content textBody = new Content().withData(BODY); 
-        Body body = new Body().withText(textBody);
-        
-        // Create a message with the specified subject and body.
-        Message message = new Message().withSubject(subject).withBody(body);
-        
-        // Assemble the email.
-        SendEmailRequest request = new SendEmailRequest().withSource(FROM).withDestination(destination).withMessage(message);
-        
+	    final String BODY = "This is your new Anchor password: "+ password +". Please use this to log into Anchor!";
+	    final String SUBJECT = "Anchor Password Reset";
+	    
+	    // Supply your SMTP credentials below. Note that your SMTP credentials are different from your AWS credentials.
+	    final String SMTP_USERNAME = "AKIAJJQCMBP36LKMKKEA";  // Replace with your SMTP username.
+	    final String SMTP_PASSWORD = "ApwHRXvThcESHiHWDY1XGeLuWPEEXHTST5+8HPU63t6x";  // Replace with your SMTP password.
+	    
+	    // Amazon SES SMTP host name. This example uses the US West (Oregon) region.
+	    final String HOST = "email-smtp.us-west-2.amazonaws.com";    
+	    
+	    // Port we will connect to on the Amazon SES SMTP endpoint. We are choosing port 25 because we will use
+	    // STARTTLS to encrypt the connection.
+	    final int PORT = 25;
+
+
+        // Create a Properties object to contain connection configuration information.
+        Properties props = System.getProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.port", PORT); 
+            
+            // Set properties indicating that we want to use STARTTLS to encrypt the connection.
+            // The SMTP session will begin on an unencrypted connection, and then the client
+        // will issue a STARTTLS command to upgrade to an encrypted connection.
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+
+        // Create a Session object to represent a mail session with the specified properties. 
+            Session session = Session.getDefaultInstance(props);
+
+        Transport transport = null; 
         try
-        {        
-            System.out.println("Attempting to send an email through Amazon SES by using the AWS SDK for Java...");
-        
-            // Instantiate an Amazon SES client, which will make the service call. The service call requires your AWS credentials. 
-            // Because we're not providing an argument when instantiating the client, the SDK will attempt to find your AWS credentials 
-            // using the default credential provider chain. The first place the chain looks for the credentials is in environment variables 
-            // AWS_ACCESS_KEY_ID and AWS_SECRET_KEY. 
-            // For more information, see http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/credentials.html
-            AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient();
-               
-            // Choose the AWS region of the Amazon SES endpoint you want to connect to. Note that your sandbox 
-            // status, sending limits, and Amazon SES identity-related settings are specific to a given AWS 
-            // region, so be sure to select an AWS region in which you set up Amazon SES. Here, we are using 
-            // the US West (Oregon) region. Examples of other regions that Amazon SES supports are US_EAST_1 
-            // and EU_WEST_1. For a complete list, see http://docs.aws.amazon.com/ses/latest/DeveloperGuide/regions.html 
-            Region REGION = Region.getRegion(Regions.US_WEST_2);
-            client.setRegion(REGION);
-       
-            // Send the email.
-            client.sendEmail(request);  
-            System.out.println("Email sent!");
-        }
-        catch (Exception ex) 
         {
+        // Create a message with the specified information. 
+        MimeMessage msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress(FROM));
+        msg.setRecipient(Message.RecipientType.TO, new InternetAddress(TO));
+        msg.setSubject(SUBJECT);
+        msg.setContent(BODY,"text/plain");
+            
+        // Create a transport.        
+        transport = session.getTransport();
+                    
+        // Send the message.
+        
+            System.out.println("Attempting to send an email through the Amazon SES SMTP interface...");
+            
+            // Connect to Amazon SES using the SMTP username and password you specified above.
+            transport.connect(HOST, SMTP_USERNAME, SMTP_PASSWORD);
+                
+            // Send the email.
+            transport.sendMessage(msg, msg.getAllRecipients());
+            System.out.println("Email sent!");
+            transport.close();        	
+        }
+        catch (Exception ex) {
             System.out.println("The email was not sent.");
             System.out.println("Error message: " + ex.getMessage());
         }
