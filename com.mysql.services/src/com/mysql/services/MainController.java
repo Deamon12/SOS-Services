@@ -12,6 +12,13 @@ import javax.ws.rs.core.MediaType;
 import com.google.android.gcm.demo.server.Datastore;
 import com.google.gson.Gson;
 
+/**
+ * This file contains all url paths that call queries in 
+ * SOSModel.java. 
+ * 
+ * @author Mingyu Hu
+ *
+ */
 @Path ("/serviceclass")
 public class MainController {
 	

@@ -27,10 +27,16 @@ public class SOSModel
 	private final int deleteUser = 4;
 	private Connection connection;
 
+	/**
+	 * SOSModel Constructor
+	 */
 	public SOSModel(){
 		openConnection();
 	}
 
+	/**
+	 * Opens database connection.
+	 */
 	public void openConnection(){
 		//open database connection
 		try
@@ -54,6 +60,9 @@ public class SOSModel
 		}
 	}
 
+	/**
+	 * Closes database connection.
+	 */
 	public void closeConnection(){
 		//close database connection
 		try {
@@ -69,8 +78,8 @@ public class SOSModel
 
 
 	/**
-	 * Get Tag List
-	 * @return tag_id, tag
+	 * Retrieves list of tags.
+	 * @return JSONArray with tag and tag_id
 	 */
 	public StandardResult getTags() {
 		//get all tag names and tag id's
@@ -80,6 +89,7 @@ public class SOSModel
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//format query result into JSONArray 
 		try{
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -104,7 +114,15 @@ public class SOSModel
 	}
 	
 	
+	/**
+	 * Retrieves list of all people that have been rating and 
+	 * what that rating was.
+	 * 
+	 * @param userId
+	 * @return JSONArray of JSONObj containing rated_user and rating of that user
+	 */
 	public StandardResult getRateList(String userId) {
+		//gets all users rated by userId and what that rating was
 		String query = 
 				"SELECT rated_user, rating FROM ratings WHERE user_id = '"+userId+"'";
 
@@ -135,14 +153,16 @@ public class SOSModel
 
 
 	/**
-	 * If successful creation return user object. So app can use it to continue to login.
+	 * If successful creation return user information.
 	 * If unsuccessful creation return what the error is. ie account exists, email exists..
 	 * 
 	 * @param firstName
 	 * @param lastName
 	 * @param password
 	 * @param email
-	 * @return success or failure
+	 * @param image
+	 * @param deviceId
+	 * @return JSONArray containing only success or failure.
 	 */
 	public StandardResult createUser(String firstName, String lastName, String password, 
 			String email, String image, String deviceId){
@@ -157,6 +177,7 @@ public class SOSModel
                                 + " VALUES ('"+userId+"', '"+firstName+"', '"+lastName+"', '"+password+"', '"+email+"', True, "
                                 + " '' , '', '" +image+"')";
 		}
+		//query to insert into user table without image
 		else{
                 query = 
 					"INSERT INTO users (user_id, first_name, last_name, password, email, active, school, major)"
@@ -198,9 +219,9 @@ public class SOSModel
 	}
 
 	/**
-	 * 
+	 * Retrieve all information about a user denoted by userId
 	 * @param userId
-	 * @return user_id, first_name, last_name, email, school, major
+	 * @return JSONArray containing user_id, first_name, last_name, email, school, major
 	 */
 	public StandardResult getUserById(String userId){
 
@@ -212,6 +233,7 @@ public class SOSModel
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//reformat query results
 		try{
 			
 			Statement stmt = connection.createStatement();
@@ -241,6 +263,12 @@ public class SOSModel
 
 	}
 
+	/**
+	 * Update users table in database with received information
+	 * 
+	 * @param firstName, lastName, school, major, description, image
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult updateProfile(String userId, String firstName, String lastName, String school, String major, 
 			String description, String image){
 
@@ -249,7 +277,6 @@ public class SOSModel
 		
 		
 		StandardResult finalResult = new StandardResult();
-		JSONArray results;
 
 		try{
 			
@@ -276,18 +303,21 @@ public class SOSModel
 	}
 
 	/**
-	 * @param email
-	 * @param password
-	 * @return single row or empty array if no row exists
+	 * Checks for correct credentials to allow for login
+	 * 
+	 * @param email, password
+	 * @return JSONArray containing single row or empty array if no row exists
 	 */
 	public StandardResult doLogin(String email, String password){
 
+		//retrieve information if email, password combination exists
 		String query = "SELECT user_id, first_name, last_name, date, image, email, active, rating, "
 				+ "description, school, major FROM users WHERE email= '" +email+"' and password= '"+password+"'";
 
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//reformat results
 		try{
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -312,22 +342,33 @@ public class SOSModel
 		return finalResult;
 
 	}
+	
+	/**
+	 * Resets password for identified email, and sends a email with new password to that email
+	 * 
+	 * @param email 
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult forgotPassword(String email){
 
+		//create new password, and hash the password for security
 		String newpass = createPassword();
 		String securePassword = Encrypt.get_SHA_1_SecurePassword(newpass);
-		System.out.println(newpass);
-		System.out.println(securePassword);
+		
+		//get if user exists and then reset password queries
 		String getUser = "SELECT user_id, first_name, last_name FROM users WHERE email ='"+email+"'";
 		String updatePassword = "UPDATE users SET password = '"+securePassword+"' WHERE email= '"+email+"'";
+		
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 		
 		try{
 			Statement stmt = connection.createStatement();
+			//returns user's information for client side use
 			ResultSet rs = stmt.executeQuery(getUser);
 			results = convertToJSON(rs);
 
+			//if email does not exist, executing this query will not have any affect on database
 			stmt.executeUpdate(updatePassword);
 
 			
@@ -343,6 +384,7 @@ public class SOSModel
 			e.printStackTrace();
 		}
 		
+		//send email to email
 		Utilities.sendEmail(email, newpass);
 
 		closeConnection();
@@ -351,13 +393,19 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Resets password with desired password.
+	 * 
+	 * @param userId, password
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult resetPassword(String userId, String password){
 
-		//TODO search for user by email and password
 		String query = "UPDATE users SET password = '"+password+"' WHERE user_id= '"+userId+"'";
 
 		StandardResult finalResult = new StandardResult();
 
+		//convert query results
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
@@ -378,9 +426,14 @@ public class SOSModel
 
 	}
 
+	/**
+	 * Resets email with desired email 
+	 * 
+	 * @param email, userId 
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult resetEmail(String email, String userId){
 
-		//TODO search for user by email and password
 		String query = "UPDATE users SET email = '"+email+"' WHERE user_id = '"+userId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -405,9 +458,15 @@ public class SOSModel
 
 	}	
 	
+	/**
+	 * Retrieves information about whether or not userId is in a group
+	 * 
+	 * @param userId 
+	 * @return JSONArray containing question_id of group if userId is in a group,
+	 * empty array returned if not in group 
+	 */
 	public StandardResult inGroup(String userId){
 
-		//TODO search for user by email and password
 		String query = "SELECT question_id FROM members WHERE user_id= '" +userId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -438,9 +497,14 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Retrieves information whether or not userId owns a question
+	 * 
+	 * @param userId
+	 * @return JSONArray of question_id if userId is owner of a question, empty array otherwise
+	 */
 	public StandardResult hasQuestion(String userId){
-
-		//TODO search for user by email and password
+		//check if userId has a question associated with it
 		String query = "SELECT question_id FROM questions WHERE user_id= '" +userId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -471,6 +535,12 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Creates a question based on given information
+	 * 
+	 * @param userId, latitude, longitude, text, tags, tutor, studyGroup, topic, visibileLocation
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult createQuestion(String userId, double latitude, double longitude, 
 			String text, List<String> tags, int tutor, int studyGroup, String topic, int visibleLocation){
 
@@ -538,6 +608,7 @@ public class SOSModel
 				
 			}
 
+			//add member into members table with associated tutor value
 			String addMember = 
 				"INSERT INTO members (question_id, user_id, tutor)"
 					+ "VALUES ('"+questionId+"', '"+userId+"', "+0+")";
@@ -562,8 +633,15 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Remove all tags related to question
+	 * 
+	 * @param questionId 
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult removeAllTags(int questionId){
 
+		//delete all tags associated with questionId
 		String query = "DELETE FROM question_tag WHERE question_id = "+questionId;
 
 		StandardResult finalResult = new StandardResult();
@@ -588,6 +666,12 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Edit question with new information
+	 * 
+	 * @param questionId, text, tags, tutor, studyGroup, topic, visibleLocation
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult editQuestion(int questionId, String text, List<String> tags, int tutor,
 			int studyGroup, String topic, int visibleLocation){
 
@@ -595,7 +679,7 @@ public class SOSModel
 		String edit = 
 				"UPDATE questions SET text = '"+text+"', tutor = "+tutor+", study_group="+studyGroup+","
 						+ "topic='"+topic+"', visible_location="+visibleLocation+" WHERE question_id = "+questionId;
-
+		//remove all tags
 		String tag= "DELETE FROM question_tag WHERE question_id = "+questionId;
 
 		StandardResult finalResult = new StandardResult();
@@ -608,7 +692,8 @@ public class SOSModel
 			
 			JSONArray temp = new JSONArray();
 			JSONArray tagtemp = new JSONArray();
-
+			
+			//re-associate new list of tags
 			String alltags = "";
 			for (int a=0; a<tags.size(); a++){
                 //if tags is not in tag table then add to tag table
@@ -663,13 +748,21 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Changes location of question
+	 * 
+	 * @param questionId, latitude, longitude
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult editLocation(int questionId, double latitude, double longitude){
 
+		//update coordinates of question
 		String query = "UPDATE questions SET latitude = "+latitude+", longitude = "+longitude
 				+ "WHERE question_id ="+questionId;
 
 		StandardResult finalResult = new StandardResult();
 
+		//reformats results
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
@@ -690,12 +783,20 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Changes the owner of group. new userId attached to question
+	 * 
+	 * @param questionId, userId 
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult changeOwner(int questionId, String userId) {
 
+		//setting new userId to be associated with question
 		String query = "UPDATE questions SET user_id= '"+userId+"' WHERE question_id = "+questionId;
 		
 		StandardResult finalResult = new StandardResult();
 
+		//reformat results
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
@@ -714,12 +815,20 @@ public class SOSModel
 		return finalResult;
 	}	
 	
+	/**
+	 * Change whether or not your location is visible 
+	 * 
+	 * @param questionId, visible
+	 * @return JSONArray with success or failure
+	 */
 	public StandardResult setVisibility(int questionId, int visible) {
-
+		
+		//update location visibility
 		String query = "UPDATE questions SET visible_location = "+visible+" WHERE question_id = "+questionId;
 		
 		StandardResult finalResult = new StandardResult();
 
+		//reformat results
 		try{
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
@@ -739,6 +848,12 @@ public class SOSModel
 	}	
 	
 
+	/**
+	 * return all questions with mile limit based on filter
+	 * 
+	 * @param latitude, longitude, tags, limit
+	 * @return JSONArry of question results and associated user information
+	 */
 	public StandardResult getQuestions(double latitude, double longitude,  List<String> tags, double limit) {
 
 		//get boundaries for latitude/longitude
@@ -747,7 +862,7 @@ public class SOSModel
 		double minLong = longitude - Utilities.distLong(limit);
 		double maxLong = longitude + Utilities.distLong(limit);
 		
-		//execute query for if there is tag filter or if not tag filter
+		//execute query for if there is no tag filter 
 		String query = "";
 		if(tags.isEmpty()){
 			query = "SELECT q.question_id, q.text, q.date, q.topic, u.user_id, u.first_name, u.last_name, u.image,"
@@ -756,6 +871,7 @@ public class SOSModel
 					+ " WHERE q.latitude BETWEEN "+minLat+" AND "+maxLat+"AND q.longitude BETWEEN "+minLong+" AND "+maxLong
 					+ "AND q.active = 1 ORDER BY date DESC";
 		}
+		//execute query if there is a tag filter
 		else{
 			String alltags = "";
 			for (int a=0; a<tags.size(); a++){
@@ -776,6 +892,7 @@ public class SOSModel
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//reformat results
 		try{
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -802,8 +919,9 @@ public class SOSModel
 
 	
 	/**
-	 * Return question info
-	 * @param question - unique question id
+	 * Retrieves all info associated with questionId
+	 * 
+	 * @param questionId 
 	 * @return question info and user info and tags associated with question
 	 */
 	public StandardResult viewQuestion(int questionId) {
@@ -853,16 +971,23 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Retrieves all comments on a question
+	 * 
+	 * @param questionId
+	 * @return JSONArray of all comments
+	 */
 	public StandardResult getComments(int questionId) {
 
+		//obtains comment as well as person commenting
 		String query = "SELECT u.user_id, u.first_name, u.last_name, u.image, c.comment, c.posted FROM comments AS c INNER JOIN "
 				+ "users AS u ON c.user_id = u.user_id WHERE c.question_id= '"+questionId+"' ORDER BY posted ASC";
 		
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//reformat results
 		try{
-			//concatenate all the question info and tag info into 1 JSONArray
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 
@@ -886,6 +1011,12 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Insert comment into database 
+	 * 
+	 * @param questionId, userId, comment 
+	 * @return JSONArray contains success or failure
+	 */
 	public StandardResult addComment(int questionId, String userId, String comment) {
 
 		//get question info
@@ -917,15 +1048,12 @@ public class SOSModel
 	
 	
 	/**
-	 * This is called when a person wants to join a group. Initiates notification scheme.
-	 * This will be followed by a call to "joinGroup" if leader accepts this userId
-	 * @param questionId
-	 * @param userId
-	 * @return 
+	 * User asks to join group, sends push notification to group owner
+	 * 
+	 * @param questionId, userId, tutor
+	 * @return JSONArray 
 	 */
 	public StandardResult askToJoinGroup(int questionId, String userId, int tutor) {
-		//TODO show up user info 
-		//TODO notify group leader. add asking userId to "waiting for response" list? (for UI)
 		String query = "SELECT d.device_id FROM device as d JOIN users as u ON u.user_id = d.user_id"
 				+ " JOIN questions AS q ON (u.user_id = q.user_id AND q.question_id = "+questionId+")";
 
@@ -962,8 +1090,7 @@ public class SOSModel
 			finalResult.setResult(results);
 			finalResult.setExpectResults(results.length());
 			
-			//If we get here, we can send a notification
-			//to group leader
+			//If we get here, send a notification to group leader
 			if(tutor==1){
 				sendNotification(devices, userId, addTutor, ""+questionId);
 			}
@@ -986,11 +1113,19 @@ public class SOSModel
 	}
 	
 	
+	/**
+	 * User is accepted into group and added into members database
+	 * Also user receives push notification indicating that they have been added to group
+	 * 
+	 * @param questionId, userId, tutor
+	 * @return JSONArray contains success or failure
+	 */
 	public StandardResult acceptUser(int questionId, String userId, int tutor) {
 
-		//TODO add userId to group member list and send notification
+		//insert new user into members table when added into a group
 		String query = "INSERT INTO members (question_id, user_id, tutor) VALUES ("+questionId+",'"+userId+"', "+tutor+")";
 		
+		//get deviceId to send to push notifications to
 		String getDevice = "SELECT device_id FROM device WHERE user_id= '"+userId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -1001,6 +1136,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(getDevice);
 
+			//if more devices to send to 
 			while(rs.next()){
 				devices.add(rs.getString("device_id"));
 			}
@@ -1025,11 +1161,18 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Removes user from a group, removes from members table
+	 * 
+	 * @param userId 
+	 * @return JSONArray contains success or failure
+	 */
 	public StandardResult removeUser(String userId) {
 
-		//TODO add userId to group member list and send notification
+		//delete user out of member table
 		String query = "DELETE FROM members WHERE user_id = '"+userId+"'";
 		
+		//get deviceId to send notification
 		String getDevice = "SELECT device_id FROM device WHERE user_id= '"+userId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -1040,6 +1183,7 @@ public class SOSModel
 			stmt.executeUpdate(query);
 			ResultSet rs = stmt.executeQuery(getDevice);
 
+			//get all deviceId's if someone is logged onto different devices
 			while(rs.next()){
 				devices.add(rs.getString("device_id"));
 			}
@@ -1065,17 +1209,23 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Retrieves all members in a group
+	 * 
+	 * @param questionId
+	 * @return JSONArray contains user information as well as member or tutor information
+	 */
 	public StandardResult viewMembers(int questionId) {
 
-		//get question info
+		//query all member info and whether joined as tutor or member
 		String query = "SELECT u.user_id, u.first_name, u.last_name, u.image,  m.tutor FROM members AS m INNER JOIN users AS u"
 				+ " ON m.user_id = u.user_id WHERE m.question_id = "+questionId;
 		
 		StandardResult finalResult = new StandardResult();
 		JSONArray results;
 
+		//reformat results
 		try{
-			//concatenate all the question info and tag info into 1 JSONArray
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			
@@ -1099,9 +1249,15 @@ public class SOSModel
 		return finalResult;
 	}
 	
+	/**
+	 * Opens a group to be come visible in feed
+	 * 
+	 * @param questionId
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult openGroup(int questionId){
 
-		//remove question from questions, remove group members from members, remove tags related to question
+		//update question to active
 		String activate = "UPDATE questions SET active = 1 WHERE question_id = '"+questionId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -1127,9 +1283,15 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Makes group invisible in feed
+	 * 
+	 * @param questionId
+	 * @return JSONArray contains success or failure
+	 */
 	public StandardResult closeGroup(int questionId){
 
-		//remove question from questions, remove group members from members, remove tags related to question
+		//sets question to inactive
 		String inactivate = "UPDATE questions SET active = 0 WHERE question_id = '"+questionId+"'";
 
 		StandardResult finalResult = new StandardResult();
@@ -1155,6 +1317,12 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Remove group and all related information from database 
+	 * 
+	 * @param questionId 
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult removeGroup(int questionId){
 
 		//remove question from questions, remove group members from members, remove tags related to question
@@ -1188,11 +1356,18 @@ public class SOSModel
 
 	}
 	
+	/**
+	 * Increment or decrement rating for a certain user 
+	 * 
+	 * @param userId, ratedUserId, like, rated
+	 * @return JSONArray containing success or failure
+	 */
 	public StandardResult rateTutor(String userId, String ratedUserId, int like, boolean rated) {
 
-		//TODO add userId to group member list and send notification
+		//check for rating 
 		String getRating= "SELECT rating FROM users WHERE user_id = '"+ratedUserId+"'";
 		
+		//if user has rated ratedUser before, update. If not, insert into table
 		String updateRatingsTable; 
 		if (rated == true){
 			updateRatingsTable = "UPDATE ratings SET rating = "+like+" WHERE user_id = '"+userId+"' AND rated_user = '"+ratedUserId+"'";
@@ -1209,10 +1384,12 @@ public class SOSModel
 			stmt.executeUpdate(updateRatingsTable);
 			ResultSet rs = stmt.executeQuery(getRating);
 			
+			//obtain rating
 			rs.first();
 			int currRating = rs.getInt("rating");
 			System.out.println(currRating);
 			
+			//update rating
 			currRating = currRating + like;
 			System.out.println(currRating);
 			
@@ -1235,6 +1412,13 @@ public class SOSModel
 		return finalResult;
 	}
 
+	/**
+	 * Takes a resultSet and converts it into a JSONArray
+	 * 
+	 * @param resultSet
+	 * @return JSONArray 
+	 * @throws Exception
+	 */
 	public static JSONArray convertToJSON(ResultSet resultSet) throws Exception {
         JSONArray jsonArray = new JSONArray();
         while (resultSet.next()) {
@@ -1250,12 +1434,19 @@ public class SOSModel
     }
 
 
-
+	/**
+	 * Randomly creates userID
+	 * @return string
+	 */
 	public static String createUserId(){
 		SecureRandom random = new SecureRandom();
 		return new BigInteger(130, random).toString(32);
 	}
 	
+	/**
+	 * randomly creates a password
+	 * @return string
+	 */
 	public static String createPassword(){
 		SecureRandom random = new SecureRandom();
 		return new BigInteger(40, random).toString(32);

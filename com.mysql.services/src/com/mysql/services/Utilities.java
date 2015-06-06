@@ -93,6 +93,12 @@ public class Utilities {
 		}
 	}
 	
+	/**
+	 * Send email with password to email address
+	 * 
+	 * @param sendTo
+	 * @param password
+	 */
 	static void sendEmail(String sendTo, String password){
 		final String FROM = "soscse110@gmail.com";   
 	    final String TO = sendTo;  

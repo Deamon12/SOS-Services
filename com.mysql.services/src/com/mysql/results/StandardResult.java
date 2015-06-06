@@ -1,6 +1,11 @@
 package com.mysql.results;
 
-
+/**
+ * Set Result class so that it can catch query results
+ * 
+ * @author Mingyu Hu
+ *
+ */
 public class StandardResult {
 
 	private int expectResults = 0;
